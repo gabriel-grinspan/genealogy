@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_partner_form_geneaology" model="ir.ui.view">
+            <field name="name">res.partner.view.form.inherit.geneaology</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="priority">10</field>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='contact_addresses']" position="before">
+                    <page string="Personal Information" name="contact_information" autofocus="autofocus">
+                        <label for="date_of_birth">Date of Birth</label>
+                        <field name="date_of_birth"/>
+
+                        <group string="Parents">
+                            <field name="father_id" domain="[('id', 'not in', [id, mother_id])]"/>
+                            <field name="mother_id" domain="[('id', 'not in', [id, father_id])]"/>
+                        </group>
+
+                        <field name="spouse_id" domain="[('id', 'not in', [id, father_id, mother_id])]"/>
+                        <field name="children_ids"/>
+                    </page>
+                </xpath>
+
+                <xpath expr="//page[@name='contact_addresses']" position="attributes">
+                    <attribute name="autofocus">0</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
