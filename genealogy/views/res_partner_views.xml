@@ -9,22 +9,43 @@
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='contact_addresses']" position="before">
                     <page string="Personal Information" name="contact_information" autofocus="autofocus">
-                        <label for="date_of_birth">Date of Birth</label>
-                        <field name="date_of_birth"/>
-
-                        <group string="Parents">
-                            <field name="father_id" domain="[('id', 'not in', [id, mother_id])]"/>
-                            <field name="mother_id" domain="[('id', 'not in', [id, father_id])]"/>
+                        <group string="Dates">
+                            <field name="date_of_birth"/>
+                            <field name="date_of_death"/>
                         </group>
 
-                        <field name="spouse_id" domain="[('id', 'not in', [id, father_id, mother_id])]"/>
+                        <group string="Parents">
+                            <field name="father_id" domain="[('id', 'not in', [id, mother_id]), ('id', 'not in', children_ids)]"/>
+                            <field name="mother_id" domain="[('id', 'not in', [id, father_id]), ('id', 'not in', children_ids)]"/>
+                        </group>
+
+                        <field name="spouse_ids" domain="[('id', 'not in', [id, father_id, mother_id]), ('id', 'not in', children_ids)]" widget="many2many_tags"/>
+                        <label for="relationship_ids">Previous Partnerships</label>
+                        <field name="relationship_ids"/>
+
+                        <label for="children_ids">Children</label>
                         <field name="children_ids"/>
                     </page>
                 </xpath>
 
                 <xpath expr="//page[@name='contact_addresses']" position="attributes">
                     <attribute name="autofocus">0</attribute>
+                    <attribute name="string">Past Addresses</attribute>
                 </xpath>
+            </field>
+        </record>
+
+        <record id="view_partner_relationship_list" model="ir.ui.view">
+            <field name="name">res.partner.relationship.view.tree</field>
+            <field name="model">res.partner.relationship</field>
+            <field name="arch" type="xml">
+                <tree string="Partnerships" editable="bottom">
+                    <field name="male_id"/>
+                    <field name="female_id"/>
+                    <field name="status"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                </tree>
             </field>
         </record>
     </data>
