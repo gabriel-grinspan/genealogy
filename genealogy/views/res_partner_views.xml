@@ -9,9 +9,18 @@
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='contact_addresses']" position="before">
                     <page string="Personal Information" name="contact_information" autofocus="autofocus">
+                        <field name="alias_ids"/>
+
+                        <label for="sex"/>
+                        <field name="sex"/>
+
                         <group string="Dates">
                             <field name="date_of_birth"/>
+                            <field name="birth_after_sunset"/>
+                            <field name="lunisolar_date_of_birth"/>
                             <field name="date_of_death"/>
+                            <field name="death_after_sunset"/>
+                            <field name="lunisolar_date_of_death"/>
                         </group>
 
                         <group string="Parents">
@@ -19,29 +28,99 @@
                             <field name="mother_id" domain="[('id', 'not in', [id, father_id]), ('id', 'not in', children_ids)]"/>
                         </group>
 
+                        <label for="spouse_ids"/>
                         <field name="spouse_ids" domain="[('id', 'not in', [id, father_id, mother_id]), ('id', 'not in', children_ids)]" widget="many2many_tags"/>
-                        <label for="relationship_ids">Previous Partnerships</label>
-                        <field name="relationship_ids"/>
+                        <label for="relationship_ids"/>
+                        <field name="relationship_ids" context="{'partner_id': id}"/>
 
-                        <label for="children_ids">Children</label>
-                        <field name="children_ids"/>
+                        <label for="children_ids"/>
+                        <field name="children_ids" mode="kanban">
+                            <kanban>
+                                <field name="id"/>
+                                <field name="color"/>
+                                <field name="name"/>
+                                <field name="title"/>
+                                <field name="type"/>
+                                <field name="email"/>
+                                <field name="parent_id"/>
+                                <field name="is_company"/>
+                                <field name="function"/>
+                                <field name="phone"/>
+                                <field name="street"/>
+                                <field name="street2"/>
+                                <field name="zip"/>
+                                <field name="city"/>
+                                <field name="country_id"/>
+                                <field name="mobile"/>
+                                <field name="state_id"/>
+                                <field name="image_128"/>
+                                <field name="avatar_128"/>
+                                <field name="lang"/>
+                                <!-- fields in form x2many view to diminish requests -->
+                                <field name="comment"/>
+                                <field name="display_name"/>
+                                <templates>
+                                    <t t-name="kanban-box">
+                                        <t t-set="color" t-value="kanban_color(record.color.raw_value)"/>
+                                        <div t-att-class="color + (record.title.raw_value == 1 ? ' oe_kanban_color_alert' : '') + ' oe_kanban_global_click'">
+                                            <div class="o_kanban_image">
+                                                <img alt="Contact image" t-att-src="kanban_image('res.partner', 'avatar_128', record.id.raw_value)"/>
+                                            </div>
+                                            <div class="oe_kanban_details">
+                                                <field name="name"/>
+                                                <div t-if="record.function.raw_value"><field name="function"/></div>
+                                                <div t-if="record.email.raw_value"><field name="email" widget="email"/></div>
+                                                <div t-if="record.type.raw_value != 'contact'">
+                                                    <div>
+                                                        <field name="zip"/><t t-if="record.city"> </t>
+                                                        <field name="city"/>
+                                                    </div>
+                                                    <field t-if="record.state_id.raw_value" name="state_id"/><t t-if="record.country_id"> </t>
+                                                    <field name="country_id"/>
+                                                </div>
+                                                <div t-if="record.phone.raw_value">Phone: <t t-esc="record.phone.value"/></div>
+                                                <div t-if="record.mobile.raw_value">Mobile: <t t-esc="record.mobile.value"/></div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
+                        </field>
+                        
+                        <label for="living_with"/>
+                        <field name="living_with"/>
+                    </page>
+
+                    <page name="addresses" string="Past Addresses">
+                        <field name="address_ids"/>
                     </page>
                 </xpath>
 
                 <xpath expr="//page[@name='contact_addresses']" position="attributes">
-                    <attribute name="autofocus">0</attribute>
-                    <attribute name="string">Past Addresses</attribute>
+                    <attribute name="autofocus" value="0"/>
+                    <attribute name="invisible" value="1"/>
+                    <!-- <attribute name="string">Past Addresses</attribute> -->
                 </xpath>
             </field>
         </record>
 
-        <record id="view_partner_relationship_list" model="ir.ui.view">
+        <record id="view_partner_alias_tree" model="ir.ui.view">
+            <field name="name">res.partner.alias.view.tree</field>
+            <field name="model">res.partner.alias</field>
+            <field name="arch" type="xml">
+                <tree string="Aliases" editable="bottom">
+                    <field name="name"/>
+                    <field name="alias_type"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_partner_relationship_tree" model="ir.ui.view">
             <field name="name">res.partner.relationship.view.tree</field>
             <field name="model">res.partner.relationship</field>
             <field name="arch" type="xml">
                 <tree string="Partnerships" editable="bottom">
-                    <field name="male_id"/>
-                    <field name="female_id"/>
+                    <field name="partner_id"/>
                     <field name="status"/>
                     <field name="start_date"/>
                     <field name="end_date"/>

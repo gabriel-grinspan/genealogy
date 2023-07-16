@@ -1,33 +1,33 @@
 from odoo import models, fields, api
 
-import logging
-
-_logger = logging.getLogger(__name__)
 
 class ResPartnerRelationship(models.Model):
     _name = 'res.partner.relationship'
 
     male_id = fields.Many2one('res.partner', string='Husband')
     female_id = fields.Many2one('res.partner', string='Wife')
-    status = fields.Selection(string='Relationship Status', selection=[
+    partner_id = fields.Many2one('res.partner', compute='_compute_partner_id', inverse='_set_partner_id')
+    status = fields.Selection([
         ('married', 'Married'),
         ('divorced', 'Divorced'),
         ('deceased', 'Deceased Partner'),
         ('live_together', 'Living Together'),
         ('boyfriend_girlfriend', 'Boyfriend/Girlfriend'),
         ('children', 'Have Children Together'),
-    ])
+    ], string='Relationship Status')
     start_date = fields.Date('Start')
     end_date = fields.Date('End')
 
-    def default_get(self, fields):
-        res = super(ResPartnerRelationship, self).default_get(fields)
-        params = self._context.get('params')
-        if params and params.get('model') == 'res.partner':
-            partner_id = params.get('id')
-            sex = self.env['res.partner'].browse(partner_id).sex
-            if sex in ['male', 'other', 'unknown']:
-                res.update({'husband_id': partner_id})
-            elif sex == 'female':
-                res.update({'wife_id': partner_id})
-        return res
+    def _compute_partner_id(self):
+        for relationship in self:
+            partner_ids = (relationship.male_id | relationship.female_id).ids
+            if len(partner_ids) > 1:
+                partner_ids.remove(relationship._context.get('partner_id'))
+                relationship.partner_id = partner_ids[0]
+
+    def _set_partner_id(self):
+        partner_id = self._context.get('partner_id') or self._context.get('params').get('id')
+        if self.male_id.id == partner_id:
+            self.female_id = self.partner_id.id
+        elif self.female_id.id == partner_id:
+            self.male_id = self.partner_id.id
