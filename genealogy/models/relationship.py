@@ -4,6 +4,7 @@ from odoo import models, fields, api
 class ResPartnerRelationship(models.Model):
     _name = 'res.partner.relationship'
 
+    sequence = fields.Integer('Sequence')
     male_id = fields.Many2one('res.partner', string='Husband')
     female_id = fields.Many2one('res.partner', string='Wife')
     partner_id = fields.Many2one('res.partner', compute='_compute_partner_id', inverse='_set_partner_id')

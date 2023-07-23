@@ -4,102 +4,151 @@
         <record id="view_partner_form_geneaology" model="ir.ui.view">
             <field name="name">res.partner.view.form.inherit.geneaology</field>
             <field name="model">res.partner</field>
-            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="inherit_id" ref="base.view_partner_form" />
             <field name="priority">10</field>
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='contact_addresses']" position="before">
                     <page string="Personal Information" name="contact_information" autofocus="autofocus">
-                        <field name="alias_ids"/>
+                        <label for="alias_ids" string="Previous Names"/>
+                        <field name="alias_ids" />
 
-                        <label for="sex"/>
-                        <field name="sex"/>
+                        <label for="sex" />
+                        <field name="sex" />
 
                         <group string="Dates">
-                            <field name="date_of_birth"/>
-                            <field name="birth_after_sunset"/>
-                            <field name="lunisolar_date_of_birth"/>
-                            <field name="date_of_death"/>
-                            <field name="death_after_sunset"/>
-                            <field name="lunisolar_date_of_death"/>
+                            <field name="date_of_birth" />
+                            <field name="birth_after_sunset" />
+                            <field name="lunisolar_date_of_birth" />
+                            <field name="date_of_death" />
+                            <field name="death_after_sunset" />
+                            <field name="lunisolar_date_of_death" />
                         </group>
 
                         <group string="Parents">
-                            <field name="father_id" domain="[('id', 'not in', [id, mother_id]), ('id', 'not in', children_ids)]"/>
-                            <field name="mother_id" domain="[('id', 'not in', [id, father_id]), ('id', 'not in', children_ids)]"/>
+                            <field name="father_id" domain="[('id', 'not in', [id, mother_id]), ('id', 'not in', children_ids)]" />
+                            <field name="mother_id" domain="[('id', 'not in', [id, father_id]), ('id', 'not in', children_ids)]" />
                         </group>
 
-                        <label for="spouse_ids"/>
-                        <field name="spouse_ids" domain="[('id', 'not in', [id, father_id, mother_id]), ('id', 'not in', children_ids)]" widget="many2many_tags"/>
-                        <label for="relationship_ids"/>
-                        <field name="relationship_ids" context="{'partner_id': id}"/>
+                        <label for="spouse_ids" />
+                        <field name="spouse_ids" domain="[('id', 'not in', [id, father_id, mother_id]), ('id', 'not in', children_ids)]" widget="many2many_tags" />
+                        <label for="relationship_ids" />
+                        <field name="relationship_ids" context="{'partner_id': id}" />
 
-                        <label for="children_ids"/>
+                        <label for="children_ids" />
                         <field name="children_ids" mode="kanban">
                             <kanban>
+                                <field name="id" />
+                                <field name="color" />
+                                <field name="name" />
+                                <field name="title" />
+                                <field name="type" />
+                                <field name="email" />
+                                <field name="parent_id" />
+                                <field name="is_company" />
+                                <field name="function" />
+                                <field name="phone" />
+                                <field name="street" />
+                                <field name="street2" />
+                                <field name="zip" />
+                                <field name="city" />
+                                <field name="country_id" />
+                                <field name="mobile" />
+                                <field name="state_id" />
+                                <field name="image_128" />
+                                <field name="lang" />
+                                <!-- fields in form x2many view to diminish requests -->
+                                <field name="comment" />
+                                <field name="display_name" />
+                                <templates>
+                                    <t t-name="kanban-box">
+                                    </t>
+                                </templates>
+                            </kanban>
+                        </field>
+                    </page>
+
+                    <page name="addresses" string="Past Addresses">
+                        <label for="address_ids" />
+                        <field name="address_ids" mode="kanban" domain="[('address_type', '!=', False)]" context="{'default_resident_ids': active_id, 'default_type': 'other'}">
+                            <kanban>
                                 <field name="id"/>
-                                <field name="color"/>
-                                <field name="name"/>
-                                <field name="title"/>
-                                <field name="type"/>
-                                <field name="email"/>
-                                <field name="parent_id"/>
-                                <field name="is_company"/>
-                                <field name="function"/>
                                 <field name="phone"/>
                                 <field name="street"/>
                                 <field name="street2"/>
-                                <field name="zip"/>
                                 <field name="city"/>
-                                <field name="country_id"/>
-                                <field name="mobile"/>
+                                <field name="zip"/>
                                 <field name="state_id"/>
-                                <field name="image_128"/>
-                                <field name="avatar_128"/>
-                                <field name="lang"/>
-                                <!-- fields in form x2many view to diminish requests -->
-                                <field name="comment"/>
-                                <field name="display_name"/>
+                                <field name="country_id"/>
+                                <field name="head_of_household_id" />
+                                <field name="head_of_household_id_image_128" />
+
                                 <templates>
                                     <t t-name="kanban-box">
-                                        <t t-set="color" t-value="kanban_color(record.color.raw_value)"/>
-                                        <div t-att-class="color + (record.title.raw_value == 1 ? ' oe_kanban_color_alert' : '') + ' oe_kanban_global_click'">
+                                        <div class="color oe_kanban_global_click">
                                             <div class="o_kanban_image">
-                                                <img alt="Contact image" t-att-src="kanban_image('res.partner', 'avatar_128', record.id.raw_value)"/>
+                                                <img alt="Contact image" t-att-src="kanban_image('res.partner', 'image_128', record.head_of_household_id.raw_value)" />
                                             </div>
                                             <div class="oe_kanban_details">
-                                                <field name="name"/>
-                                                <div t-if="record.function.raw_value"><field name="function"/></div>
-                                                <div t-if="record.email.raw_value"><field name="email" widget="email"/></div>
-                                                <div t-if="record.type.raw_value != 'contact'">
-                                                    <div>
-                                                        <field name="zip"/><t t-if="record.city"> </t>
-                                                        <field name="city"/>
-                                                    </div>
-                                                    <field t-if="record.state_id.raw_value" name="state_id"/><t t-if="record.country_id"> </t>
+                                                <div>
+                                                    <field name="street"/>
+                                                </div>
+                                                <div>
+                                                    <field name="street2"/>
+                                                </div>
+                                                <div>
+                                                    <field name="city"/><t t-if="record.city and record.state_id">, </t>
+                                                    <field name="state_id"/><t t-if="record.zip"> </t>
+                                                    <field name="zip"/>
+                                                </div>
+                                                <div>
                                                     <field name="country_id"/>
                                                 </div>
                                                 <div t-if="record.phone.raw_value">Phone: <t t-esc="record.phone.value"/></div>
-                                                <div t-if="record.mobile.raw_value">Mobile: <t t-esc="record.mobile.value"/></div>
                                             </div>
                                         </div>
                                     </t>
                                 </templates>
                             </kanban>
+                            <form string="Address">
+                                <sheet>
+                                    <field name="address_type" required="1" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="type" invisible="1"/>
+                                    <field name="resident_ids" invisible="1"/>
+                                    <hr/>
+                                    <group>
+                                        <label for="street" string="Address" />
+                                        <div class="o_address_format" name="div_address">
+                                            <field name="street" placeholder="Street..." class="o_address_street"/>
+                                            <field name="street2" placeholder="Street 2..." class="o_address_street"/>
+                                            <field name="city" placeholder="City" class="o_address_city"/>
+                                            <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
+                                            <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                                            <field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'/>
+                                        </div>
+                                        <field name="phone" widget="phone" />
+                                    </group>
+                                    <group>
+                                        <field name="head_of_household_id" domain="[('id', 'in', resident_ids)]" />
+                                        <field name="comment" placeholder="Internal notes..." nolabel="1" colspan="2"/>
+                                    </group>
+                                    <field name="lang" invisible="1"/>
+                                    <field name="user_id" invisible="1"/>
+                                </sheet>
+                            </form>
                         </field>
-                        
-                        <label for="living_with"/>
-                        <field name="living_with"/>
-                    </page>
 
-                    <page name="addresses" string="Past Addresses">
-                        <field name="address_ids"/>
+                        <label for="living_with_ids" />
+                        <field name="living_with_ids" mode="kanban" />
                     </page>
                 </xpath>
 
                 <xpath expr="//page[@name='contact_addresses']" position="attributes">
-                    <attribute name="autofocus" value="0"/>
-                    <attribute name="invisible" value="1"/>
-                    <!-- <attribute name="string">Past Addresses</attribute> -->
+                    <attribute name="autofocus" value="0" />
+                    <attribute name="invisible" value="1" />
+                </xpath>
+
+                <xpath expr="//page[@name='sales_purchases']" position="attributes">
+                    <attribute name="invisible" value="1" />
                 </xpath>
             </field>
         </record>
@@ -109,8 +158,9 @@
             <field name="model">res.partner.alias</field>
             <field name="arch" type="xml">
                 <tree string="Aliases" editable="bottom">
-                    <field name="name"/>
-                    <field name="alias_type"/>
+                    <field name="sequence" widget="handle" />
+                    <field name="name" />
+                    <field name="alias_type_ids" widget="many2many_tags" />
                 </tree>
             </field>
         </record>
@@ -120,10 +170,11 @@
             <field name="model">res.partner.relationship</field>
             <field name="arch" type="xml">
                 <tree string="Partnerships" editable="bottom">
-                    <field name="partner_id"/>
-                    <field name="status"/>
-                    <field name="start_date"/>
-                    <field name="end_date"/>
+                    <field name="sequence" widget="handle" />
+                    <field name="partner_id" />
+                    <field name="status" />
+                    <field name="start_date" />
+                    <field name="end_date" />
                 </tree>
             </field>
         </record>
