@@ -10,10 +10,13 @@ _logger = logging.getLogger(__name__)
 class ResPartnerResidence(models.Model):
     _name = 'res.partner.residence'
 
-    resident_id = fields.Many2one('res.partner', string='Resident')
+    sequence = fields.Integer('Sequence')
+    resident_id = fields.Many2one('res.partner', string='Contact', required=True)
+    residence_id = fields.Many2one('res.partner', string='Address', required=True)
     residence_type = fields.Selection([
         ('birthplace', 'Birthplace'),
-        ('previous_address', 'Previous Address'),
-        ('current_address', 'Current Address'),
+        ('previous', 'Previous Address'),
+        ('current', 'Current Address'),
         ('burial_plot', 'Burial Plot'),
-    ], string='Address Type')
+    ], string='Address Type', required=True)
+    head_of_household = fields.Boolean('Head of Household')

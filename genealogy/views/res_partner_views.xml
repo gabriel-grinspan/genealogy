@@ -9,11 +9,15 @@
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='contact_addresses']" position="before">
                     <page string="Personal Information" name="contact_information" autofocus="autofocus">
-                        <label for="alias_ids" string="Previous Names"/>
-                        <field name="alias_ids" />
+                        <group name="names" string="Names">
+                            <field name="alias_ids" />
+                            <field name="name_orig_ids" mode="kanban" domain="[('id', '!=', id)]" />
+                        </group>
 
-                        <label for="sex" />
-                        <field name="sex" />
+                        <group>
+                            <field name="sex" />
+                            <field name="can_contact" />
+                        </group>
 
                         <group string="Dates">
                             <field name="date_of_birth" />
@@ -24,7 +28,7 @@
                             <field name="lunisolar_date_of_death" />
                         </group>
 
-                        <group string="Parents">
+                        <!-- <group string="Parents">
                             <field name="father_id" domain="[('id', 'not in', [id, mother_id]), ('id', 'not in', children_ids)]" />
                             <field name="mother_id" domain="[('id', 'not in', [id, father_id]), ('id', 'not in', children_ids)]" />
                         </group>
@@ -32,44 +36,18 @@
                         <label for="spouse_ids" />
                         <field name="spouse_ids" domain="[('id', 'not in', [id, father_id, mother_id]), ('id', 'not in', children_ids)]" widget="many2many_tags" />
                         <label for="relationship_ids" />
-                        <field name="relationship_ids" context="{'partner_id': id}" />
+                        <field name="relationship_ids" context="{'partner_id': id}" /> -->
 
-                        <label for="children_ids" />
+                        <!-- <label for="children_ids" />
                         <field name="children_ids" mode="kanban">
                             <kanban>
-                                <field name="id" />
-                                <field name="color" />
-                                <field name="name" />
-                                <field name="title" />
-                                <field name="type" />
-                                <field name="email" />
-                                <field name="parent_id" />
-                                <field name="is_company" />
-                                <field name="function" />
-                                <field name="phone" />
-                                <field name="street" />
-                                <field name="street2" />
-                                <field name="zip" />
-                                <field name="city" />
-                                <field name="country_id" />
-                                <field name="mobile" />
-                                <field name="state_id" />
-                                <field name="image_128" />
-                                <field name="lang" />
-                                <!-- fields in form x2many view to diminish requests -->
-                                <field name="comment" />
-                                <field name="display_name" />
-                                <templates>
-                                    <t t-name="kanban-box">
-                                    </t>
-                                </templates>
                             </kanban>
-                        </field>
+                        </field> -->
                     </page>
 
                     <page name="addresses" string="Past Addresses">
-                        <label for="address_ids" />
-                        <field name="address_ids" mode="kanban" domain="[('address_type', '!=', False)]" context="{'default_resident_ids': active_id, 'default_type': 'other'}">
+                        <label for="residence_ids" />
+                        <field name="residence_ids" mode="kanban" domain="[('residence_type', '!=', False)]" context="{'default_parent_id': active_id, 'default_street': street, 'default_street2': street2, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_lang': lang, 'default_user_id': user_id, 'default_type': 'other', 'default_residence_type': 'current'}">
                             <kanban>
                                 <field name="id"/>
                                 <field name="phone"/>
@@ -111,7 +89,7 @@
                             </kanban>
                             <form string="Address">
                                 <sheet>
-                                    <field name="address_type" required="1" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="residence_type" required="1" widget="radio" options="{'horizontal': true}"/>
                                     <field name="type" invisible="1"/>
                                     <field name="resident_ids" invisible="1"/>
                                     <hr/>
@@ -137,8 +115,8 @@
                             </form>
                         </field>
 
-                        <label for="living_with_ids" />
-                        <field name="living_with_ids" mode="kanban" />
+                        <label for="coresident_ids" />
+                        <field name="coresident_ids" mode="kanban" />
                     </page>
                 </xpath>
 

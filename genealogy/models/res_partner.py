@@ -51,7 +51,37 @@ class ResPartner(models.Model):
 
     alias_ids = fields.One2many('res.partner.alias', 'partner_id', string='Aliases')
     name_orig_ids = fields.Many2many('res.partner', 'name_dest_id', 'name_orig_id', string='Named After')
-    name_dest_ids = fields.Many2many('res.partner', 'name_orig_id', 'name_dest_id', string='Named Before')
+    name_dest_ids = fields.Many2many('res.partner', 'name_orig_id', 'name_dest_id', string='Named Before', compute='_compute_name_dest_ids')
+
+    @api.depends('name_orig_ids')
+    def _compute_name_dest_ids(self):
+        for partner in self:
+            partner.name_dest_ids = self.search([('name_orig_ids', 'in', partner.id)])
+
+    residence_type = fields.Selection([
+        ('birthplace', 'Birthplace'),
+        ('previous', 'Previous Address'),
+        ('current', 'Current Address'),
+        ('burial_plot', 'Burial Plot'),
+    ], string='Address Type')
+
+    residence_ids = fields.Many2many('res.partner', 'resident_id', 'residence_id', string='Addresses')
+    resident_ids = fields.Many2many('res.partner', 'residence_id', 'resident_id', string='Residents', compute='_compute_resident_ids')
+    coresident_ids = fields.Many2many('res.partner', 'residence_ids', 'resident_ids', string='Living With', compute='_compute_coresident_ids', store=True)
+    
+    head_of_household_id = fields.Many2one('res.partner', string='Head of Household')
+    head_of_household_id_image_128 = fields.Image(related='head_of_household_id.image_128')
+    
+    @api.depends('residence_ids')
+    def _compute_resident_ids(self):
+        for partner in self:
+            partner.resident_ids = self.search([('residence_ids', 'in', partner.id)]).ids
+
+    @api.depends('residence_ids')
+    def _compute_coresident_ids(self):
+        for partner in self:
+            partner.coresident_ids = (partner.residence_ids.resident_ids - partner).ids
+
 
     # TODO: fix relationships and test
     father_id = fields.Many2one('res.partner', string='Father')
@@ -65,28 +95,7 @@ class ResPartner(models.Model):
     )
     spouse_ids = fields.Many2many('res.partner', string='Current Relationship(s)', compute='_compute_spouse_ids')
     # END TODO
-
-    residence_ids = fields.One2many('res.partner.residence', 'resident_id', string='Addresses')
-    # TODO: use residence ids for mapping because each person can live in multiple places and ones living situation is independent of another's
-    address_ids = fields.Many2many('res.partner', 'resident_id', 'address_id', string='Addresses')
-    resident_ids = fields.One2many('res.partner', 'address_ids', string='Residents')
-    living_with_ids = fields.Many2many('res.partner', string='Living With', compute='_compute_living_with_ids')
     
-    @api.depends('address_ids', 'address_ids.resident_ids')
-    def _compute_living_with_ids(self):
-        for partner in self:
-            partner.living_with_ids = (partner.address_ids.resident_ids - partner).ids
-
-    head_of_household_id = fields.Many2one('res.partner', string='Head of Household')
-    head_of_household_id_image_128 = fields.Image(related='head_of_household_id.image_128')
-
-    @api.depends('head_of_household_id')
-    def _verify_head_of_household_id(self):
-        self.filtered(lambda p: p.head_of_household_id not in p.resident_ids).write({
-            'head_of_household_id': False,
-        })
-
-
     def _compute_children_ids(self):
         for partner in self:
             partner.children_ids = self.search([
@@ -119,4 +128,3 @@ class ResPartner(models.Model):
                 ]),
             ])
             partner.spouse_ids = ((relationships.mapped('male_id') | relationships.mapped('female_id')) - partner).ids
-
