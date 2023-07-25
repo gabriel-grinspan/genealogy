@@ -58,30 +58,31 @@ class ResPartner(models.Model):
         for partner in self:
             partner.name_dest_ids = self.search([('name_orig_ids', 'in', partner.id)])
 
-    residence_type = fields.Selection([
-        ('birthplace', 'Birthplace'),
-        ('previous', 'Previous Address'),
-        ('current', 'Current Address'),
-        ('burial_plot', 'Burial Plot'),
-    ], string='Address Type')
+    street = fields.Char(related='current_address_id.street', readonly=True)
+    street2 = fields.Char(related='current_address_id.street2', readonly=True)
+    zip = fields.Char(related='current_address_id.zip', readonly=True)
+    city = fields.Char(related='current_address_id.city', readonly=True)
+    state_id = fields.Many2one(related='current_address_id.state_id', readonly=True)
+    country_id = fields.Many2one(related='current_address_id.country_id', readonly=True)
+    country_code = fields.Char(related='current_address_id.country_code', readonly=True)
 
-    residence_ids = fields.Many2many('res.partner', 'resident_id', 'residence_id', string='Addresses')
-    resident_ids = fields.Many2many('res.partner', 'residence_id', 'resident_id', string='Residents', compute='_compute_resident_ids')
-    coresident_ids = fields.Many2many('res.partner', 'residence_ids', 'resident_ids', string='Living With', compute='_compute_coresident_ids', store=True)
-    
-    head_of_household_id = fields.Many2one('res.partner', string='Head of Household')
-    head_of_household_id_image_128 = fields.Image(related='head_of_household_id.image_128')
-    
-    @api.depends('residence_ids')
-    def _compute_resident_ids(self):
-        for partner in self:
-            partner.resident_ids = self.search([('residence_ids', 'in', partner.id)]).ids
+    address_ids = fields.Many2many('res.partner.address', string='Addresses')
+    current_address_id = fields.Many2one('res.partner.address', string='Current Address')
 
-    @api.depends('residence_ids')
-    def _compute_coresident_ids(self):
-        for partner in self:
-            partner.coresident_ids = (partner.residence_ids.resident_ids - partner).ids
-
+    # @api.onchange('current_address_id')
+    # def _onchange_current_address_id(self):
+    #     fields_to_iter = [
+    #         'street',
+    #         'street2',
+    #         'zip',
+    #         'city',
+    #         'state_id',
+    #         'country_id',
+    #         'country_code',
+    #     ]
+    #     for partner in self:
+    #         for f in fields_to_iter:
+    #             setattr(partner, f, getattr(partner.current_address_id, f))
 
     # TODO: fix relationships and test
     father_id = fields.Many2one('res.partner', string='Father')
