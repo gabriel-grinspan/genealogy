@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="base.view_partner_form" />
             <field name="priority">10</field>
             <field name="arch" type="xml">
-                <xpath expr="//page[@name='contact_addresses']" position="before">
+                <xpath expr="//page[@name='contact_addresses']" position="replace">
                     <page string="Personal Information" name="contact_information" autofocus="autofocus">
                         <group name="names" string="Names">
                             <field name="alias_ids" nolabel="1" />
@@ -63,13 +63,13 @@
                     </page>
                 </xpath>
 
-                <xpath expr="//page[@name='contact_addresses']" position="attributes">
+                <!-- <xpath expr="//page[@name='contact_addresses']" position="attributes">
                     <attribute name="autofocus" value="0" />
                     <attribute name="invisible" value="1" />
-                </xpath>
+                </xpath> -->
 
-                <xpath expr="//page[@name='sales_purchases']" position="attributes">
-                    <attribute name="invisible" value="1" />
+                <xpath expr="//page[@name='sales_purchases']" position="replace">
+                    <!-- <attribute name="invisible" value="1" /> -->
                 </xpath>
             </field>
         </record>
