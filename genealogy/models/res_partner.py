@@ -12,18 +12,17 @@ class ResPartner(models.Model):
 
     date_of_birth = fields.Date('Date of Birth')
     birth_after_sunset = fields.Boolean()
-    lunisolar_date_of_birth = fields.Char(compute='_compute_lunisolar_date_of_birth', string='Hebrew Date of Birth', store=True)
+    lunisolar_date_of_birth = fields.Char(compute='_compute_lunisolar_date_of_birth', string='Hebrew Date of Birth')
     
     date_of_death = fields.Date('Date of Death')
     death_after_sunset = fields.Boolean()
-    lunisolar_date_of_death = fields.Char(compute='_compute_lunisolar_date_of_death', string='Hebrew Date of Death', store=True)
+    lunisolar_date_of_death = fields.Char(compute='_compute_lunisolar_date_of_death', string='Hebrew Date of Death')
     
     def _get_lunisolar_date(self, date, after_sunset):
         if not date:
             return False
 
-        request_url = 'https://www.hebcal.com/converter?cfg=json&g2h=1&strict=1'
-        request_url += date.strftime('%Y-%m-%d')
+        request_url = f'https://www.hebcal.com/converter?cfg=json&g2h=1&strict=1&date={date.strftime("%Y-%m-%d")}'
         if after_sunset:
             request_url += '&gs=on'
 

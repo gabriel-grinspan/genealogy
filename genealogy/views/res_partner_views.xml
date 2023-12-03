@@ -8,10 +8,10 @@
             <field name="priority">10</field>
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='contact_addresses']" position="replace">
-                    <page string="Personal Information" name="contact_information" autofocus="autofocus">
+                    <page string="Personal Information" name="contact_information" autofocus="autofocus" colspan="4">
                         <group name="names" string="Names">
-                            <field name="alias_ids" nolabel="1" />
-                            <field name="name_orig_ids" mode="kanban" domain="[('id', '!=', id)]" />
+                            <field name="alias_ids" nolabel="1" colspan="2" />
+                            <field name="name_orig_ids" mode="kanban" domain="[('id', '!=', id)]" colspan="2" />
                         </group>
 
                         <group>
