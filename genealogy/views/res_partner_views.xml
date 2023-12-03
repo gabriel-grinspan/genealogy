@@ -68,9 +68,9 @@
                     <attribute name="invisible" value="1" />
                 </xpath> -->
 
-                <xpath expr="//page[@name='sales_purchases']" position="replace">
-                    <!-- <attribute name="invisible" value="1" /> -->
-                </xpath>
+                <!-- <xpath expr="//page[@name='sales_purchases']" position="replace">
+                    <attribute name="invisible" value="1" />
+                </xpath> -->
             </field>
         </record>
 
