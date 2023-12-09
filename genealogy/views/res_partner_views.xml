@@ -42,7 +42,13 @@
                 <xpath expr="//page[@name='contact_addresses']" position="replace">
                     <page string="Personal Information" name="contact_information" autofocus="autofocus" colspan="4">
                         <group name="names" string="Names">
-                            <field name="alias_ids" nolabel="1" colspan="2" />
+                            <field name="alias_ids" nolabel="1" colspan="2" mode="tree">
+                                <tree string="Aliases" editable="bottom">
+                                    <field name="sequence" widget="handle" />
+                                    <field name="name" />
+                                    <field name="alias_type_ids" widget="many2many_tags" />
+                                </tree>
+                            </field>
                             <field name="name_orig_ids" mode="kanban" domain="[('id', '!=', id)]" colspan="2" />
                         </group>
 
@@ -60,7 +66,7 @@
                             <field name="lunisolar_date_of_death" />
                         </group>
 
-                        <!-- <group string="Parents">
+                        <group string="Parents">
                             <field name="father_id" domain="[('id', 'not in', [id, mother_id]), ('id', 'not in', children_ids)]" />
                             <field name="mother_id" domain="[('id', 'not in', [id, father_id]), ('id', 'not in', children_ids)]" />
                         </group>
@@ -68,13 +74,10 @@
                         <label for="spouse_ids" />
                         <field name="spouse_ids" domain="[('id', 'not in', [id, father_id, mother_id]), ('id', 'not in', children_ids)]" widget="many2many_tags" />
                         <label for="relationship_ids" />
-                        <field name="relationship_ids" context="{'partner_id': id}" /> -->
+                        <field name="relationship_ids" context="{'partner_id': id}" />
 
-                        <!-- <label for="children_ids" />
-                        <field name="children_ids" mode="kanban">
-                            <kanban>
-                            </kanban>
-                        </field> -->
+                        <label for="children_ids" />
+                        <field name="children_ids" />
                     </page>
 
                     <page name="addresses" string="Past Addresses">
@@ -181,7 +184,7 @@
             </field>
         </record>
 
-        <record id="view_partner_alias_tree" model="ir.ui.view">
+        <!-- <record id="view_partner_alias_tree" model="ir.ui.view">
             <field name="name">res.partner.alias.view.tree</field>
             <field name="model">res.partner.alias</field>
             <field name="arch" type="xml">
@@ -191,7 +194,7 @@
                     <field name="alias_type_ids" widget="many2many_tags" />
                 </tree>
             </field>
-        </record>
+        </record> -->
 
         <record id="view_partner_relationship_tree" model="ir.ui.view">
             <field name="name">res.partner.relationship.view.tree</field>
@@ -199,12 +202,74 @@
             <field name="arch" type="xml">
                 <tree string="Partnerships" editable="bottom">
                     <field name="sequence" widget="handle" />
-                    <field name="partner_id" />
+                    <field name="male_id" />
+                    <field name="female_id" />
                     <field name="status" />
                     <field name="start_date" />
                     <field name="end_date" />
                 </tree>
             </field>
         </record>
+
+        <record id="view_partner_alias_tree" model="ir.ui.view">
+            <field name="name">res.partner.alias.view.tree</field>
+            <field name="model">res.partner.alias</field>
+            <field name="arch" type="xml">
+                <tree string="Partnerships">
+                    <!-- <field name="sequence" widget="handle" /> -->
+                    <field name="partner_id" />
+                    <field name="name" />
+                    <field name="alias_type_ids" widget="many2many_tags" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_partner_alias_type_form" model="ir.ui.view">
+            <field name="name">res.partner.alias.type.view.form</field>
+            <field name="model">res.partner.alias.type</field>
+            <field name="arch" type="xml">
+                <form string="Alias Types">
+                    <div name="button_box" position="inside">
+                        <button class="oe_stat_button" type="object" name="get_aliases" icon="fa-id-card-o">
+                            <field string="Aliases" name="alias_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <group>
+                        <field name="name" />
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <record id="action_partner_relationships" model="ir.actions.act_window">
+            <field name="name">Contact Relationships</field>
+            <field name="res_model">res.partner.relationship</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+        <record id="action_partner_alias_types" model="ir.actions.act_window">
+            <field name="name">Contact Alias Types</field>
+            <field name="res_model">res.partner.alias.type</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="res_partner_menu_contacts"
+            name="Contacts"
+            action="contacts.action_contacts"
+            parent="contacts.res_partner_menu_contacts"
+            sequence="1"/>
+
+        <menuitem id="res_partner_relationship_menu_contacts"
+            name="Contact Relationships"
+            action="action_partner_relationships"
+            parent="contacts.res_partner_menu_contacts"
+            sequence="2"/>
+
+        <menuitem id="res_partner_alias_menu_contacts"
+            name="Contact Alias Types"
+            action="action_partner_alias_types"
+            parent="contacts.res_partner_menu_config"
+            sequence="2"/>
     </data>
 </odoo>
