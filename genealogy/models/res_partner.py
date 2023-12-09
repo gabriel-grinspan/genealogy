@@ -109,7 +109,14 @@ class ResPartner(models.Model):
             ], order='start_date').ids
 
     def _set_relationship_ids(self):
-        pass
+        for partner in self:
+            old_relationship_ids = self.env['res.partner.relationship'].search([
+                '|',
+                ('male_id', '=', partner.id),
+                ('female_id', '=', partner.id),
+            ], order='start_date')
+
+            (old_relationship_ids - partner.relationship_ids).unlink()
 
     spouse_ids = fields.Many2many('res.partner', string='Current Relationship(s)', compute='_compute_spouse_ids')
 

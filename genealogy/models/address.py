@@ -24,7 +24,7 @@ class ResPartnerAddress(models.Model):
 
     partner_ids = fields.Many2many('res.partner', string='Residents', compute='_compute_partner_ids')
     past_partner_ids = fields.Many2many('res.partner', string='Previous Residents', compute='_compute_partner_ids')
-    current_partner_ids = fields.One2many('res.partner', 'current_address_id', string='Current Residents', readonly=1)
+    current_partner_ids = fields.One2many('res.partner', 'current_address_id', string='Current Residents', readonly=True)
 
     def _compute_partner_ids(self):
         for address in self:
