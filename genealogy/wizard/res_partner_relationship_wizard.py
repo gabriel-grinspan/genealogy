@@ -14,24 +14,24 @@ class RelationshipWizard(models.TransientModel):
     def create_relationship(self):
         current_partner_id = self._context.get('active_id')
         if not current_partner_id:
-            print(self._context)
             raise UserError(_('You should not have been able to do this. There should be a related res.partner id attached to the context.'))
 
-        valid_sexes = {'male', 'female'}
-
         current_partner = self.env['res.partner'].browse(current_partner_id)
-        if not ({current_partner.sex} & valid_sexes or {self.partner_id.sex} & valid_sexes):
-            raise UserError(_('You must first specify the sex on one of the partners in this relationship.'))
 
-        if {current_partner.sex} & valid_sexes and not {self.partner_id.sex} & valid_sexes:
-            self.partner_id.sex = list(valid_sexes ^ {current_partner.sex})[0]
-
-        if {self.partner_id.sex} & valid_sexes and not {current_partner.sex} & valid_sexes:
-            current_partner.sex = list(valid_sexes ^ {self.partner_id.sex})[0]
+        if (
+            current_partner.sex == self.partner_id.sex or
+            current_partner.sex == 'male' or
+            self.partner_id.sex == 'female'
+        ):
+            male = current_partner_id
+            female = self.partner_id.id
+        else:
+            male = self.partner_id.id
+            female = current_partner_id
 
         self.env['res.partner.relationship'].create({
-            'male_id': current_partner_id if current_partner.sex == 'male' else self.partner_id.id,
-            'female_id': current_partner_id if current_partner.sex == 'female' else self.partner_id.id,
+            'male_id': male,
+            'female_id': female,
             'status': self.status,
             'start_date': self.start_date,
             'end_date': self.end_date,

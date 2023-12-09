@@ -42,9 +42,7 @@ class ResPartner(models.Model):
     sex = fields.Selection([
         ('male', 'Male'),
         ('female', 'Female'),
-        ('other', 'Other'),
-        ('unknown', 'Unknown'),
-    ], string='Sex', default='unknown', required=True)
+    ], string='Sex')
 
     can_contact = fields.Boolean('Can contact', default=True)
 
@@ -70,23 +68,44 @@ class ResPartner(models.Model):
 
     father_id = fields.Many2one('res.partner', string='Father')
     mother_id = fields.Many2one('res.partner', string='Mother')
+    
+    spouse_type = fields.Selection([
+        ('male', 'Husband'),
+        ('female', 'Wife'),
+        ('mixed', 'Mixed'),
+    ], compute='_compute_spouse_type')
     relationship_ids = fields.Many2many(
         'res.partner.relationship',
-        string='Partnerships',
+        string='Relationships',
         compute='_compute_relationship_ids',
+        inverse='_set_relationship_ids',
     )
     # TODO: fix relationships and test
     children_ids = fields.Many2many('res.partner', string='Children', compute='_compute_children_ids', readonly=True)
     spouse_ids = fields.Many2many('res.partner', string='Current Relationship(s)', compute='_compute_spouse_ids')
     # END TODO
+
+    def _compute_spouse_type(self):
+        for partner in self:
+            spouse_type = False
+
+            if partner in partner.relationship_ids.male_id:
+                spouse_type = 'male'
+            if partner in partner.relationship_ids.female_id:
+                if spouse_type == 'male':
+                    spouse_type = 'mixed'
+                else:
+                    spouse_type = 'female'
+
+            partner.spouse_type = spouse_type
     
     def _compute_children_ids(self):
         for partner in self:
             partner.children_ids = self.search([
                 '|',
-                ('father_id', '=', partner.id),
-                ('mother_id', '=', partner.id),
-            ]).ids
+                    ('father_id', '=', partner.id),
+                    ('mother_id', '=', partner.id),
+            ], order='date_of_birth').ids
 
     def _compute_relationship_ids(self):
         for partner in self:
@@ -95,6 +114,9 @@ class ResPartner(models.Model):
                 ('male_id', '=', partner.id),
                 ('female_id', '=', partner.id),
             ], order='start_date').ids
+
+    def _set_relationship_ids(self):
+        pass
 
     def _compute_spouse_ids(self):
         for partner in self:
@@ -106,6 +128,7 @@ class ResPartner(models.Model):
                 ('status', 'not in', [
                     'divorced',
                     'deceased',
+                    'children',
                 ]),
             ])
             partner.spouse_ids = ((relationships.mapped('male_id') | relationships.mapped('female_id')) - partner).ids

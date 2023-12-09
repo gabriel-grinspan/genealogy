@@ -28,5 +28,11 @@
         'views/res_partner_views.xml',
         'wizard/res_partner_relationship_wizard_views.xml',
     ],
+
+    'assets': {
+        'web.assets_backend': [
+            'genealogy/static/src/js/list_renderer_no_link.js',
+        ],
+    },
     'application': True,
 }

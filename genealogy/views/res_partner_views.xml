@@ -67,7 +67,7 @@
                         </group>
                     </page>
 
-                    <page name="relationships" string="Relationships">
+                    <page name="relationships" string="Family">
                         <group string="Parents" colspan="2">
                             <field name="father_id" domain="[
                                 ('id', 'not in', [id, mother_id]),
@@ -81,36 +81,47 @@
                             ]" />
                         </group>
 
-                        <!-- <label for="spouse_ids" />
+                        <group string="Children" colspan="2">
+                            <field name="children_ids">
+                            </field>
+                        </group>
+
+                        <hr />
+
+                        <label for="spouse_ids" />
                         <field name="spouse_ids" domain="[
                             ('id', 'not in', [id, father_id, mother_id]),
                             ('id', 'not in', children_ids)
-                        ]" widget="many2many_tags" /> -->
+                        ]" widget="many2many_tags" />
 
-                        <!-- Couldn't figure out the proper way to do this, should only show male/female column based on current partner -->
                         <group string="Partner History" colspan="2">
-                            <field name="relationship_ids" mode="tree" invisible="sex == 'female'">
-                                <tree>
-                                    <field name="female_id" />
+                            <field name="spouse_type" invisible="1" />
+                            <field name="relationship_ids" mode="tree" invisible="spouse_type != 'male'" widget="list_renderer_no_link">
+                                <tree editable="top" create='0'>
+                                    <field name="female_id" readonly="1" />
                                     <field name="status" />
                                     <field name="start_date" />
                                     <field name="end_date" />
                                 </tree>
                             </field>
-                            <field name="relationship_ids" mode="tree" invisible="sex == 'male'">
-                                <tree>
-                                    <field name="male_id" />
+                            <field name="relationship_ids" mode="tree" invisible="spouse_type != 'female'" widget="list_renderer_no_link">
+                                <tree editable="top" create="0">
+                                    <field name="male_id" readonly="1" />
+                                    <field name="status" />
+                                    <field name="start_date" />
+                                    <field name="end_date" />
+                                </tree>
+                            </field>
+                            <field name="relationship_ids" mode="tree" invisible="spouse_type not in ['mixed', False]" widget="list_renderer_no_link">
+                                <tree editable="top" create="0">
+                                    <field name="male_id" readonly="1" />
+                                    <field name="female_id" readonly="1" />
                                     <field name="status" />
                                     <field name="start_date" />
                                     <field name="end_date" />
                                 </tree>
                             </field>
                             <button name="action_create_relationship_wizard" type="object" string="Create Relationship" />
-                        </group>
-
-                        <group string="Children" colspan="2">
-                            <field name="children_ids">
-                            </field>
                         </group>
                     </page>
 
