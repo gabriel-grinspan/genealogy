@@ -82,8 +82,9 @@
                         </group>
 
                         <group string="Children" colspan="2">
-                            <field name="children_ids">
-                            </field>
+                            <field name="children_ids"
+                               mode="kanban"
+                               readonly="1" />
                         </group>
 
                         <hr />
@@ -96,7 +97,7 @@
 
                         <group string="Partner History" colspan="2">
                             <field name="spouse_type" invisible="1" />
-                            <field name="relationship_ids" mode="tree" invisible="spouse_type != 'male'" widget="list_renderer_no_link">
+                            <field name="relationship_ids" no_label="1" mode="tree" invisible="spouse_type != 'male'" widget="list_renderer_no_link">
                                 <tree editable="top" create='0'>
                                     <field name="female_id" readonly="1" />
                                     <field name="status" />
@@ -163,11 +164,27 @@
                         </div>
                         <field name="phone" widget="phone" />
                     </group>
+
                     <group name="residents" string="Residents">
-                        <field name="partner_ids" nolabel="1" colspan="2" />
-                    </group>
-                    <group>
+                        <field name="partner_ids" invisible="1" />
                         <field name="head_of_household_id" domain="[('id', 'in', partner_ids)]" />
+
+                        <field name="current_partner_ids" mode="tree" colspan="2">
+                            <tree>
+                                <field name="name"/>
+                                <field name="phone"/>
+                                <field name="email"/>
+                            </tree>
+                        </field>
+
+                        <field name="past_partner_ids" mode="tree" colspan="2">
+                            <tree>
+                                <field name="name"/>
+                                <field name="phone"/>
+                                <field name="email"/>
+                            </tree>
+                        </field>
+
                         <field name="comment" placeholder="Internal notes..." nolabel="1" colspan="2"/>
                     </group>
                 </form>
@@ -264,6 +281,12 @@
         </record>
 
         <!-- Menu Items -->
+        <record id="action_partner_addresses" model="ir.actions.act_window">
+            <field name="name">Contact Addresses</field>
+            <field name="res_model">res.partner.address</field>
+            <field name="view_mode">tree,form,kanban</field>
+        </record>
+
         <record id="action_partner_relationships" model="ir.actions.act_window">
             <field name="name">Contact Relationships</field>
             <field name="res_model">res.partner.relationship</field>
@@ -282,11 +305,17 @@
             parent="contacts.res_partner_menu_contacts"
             sequence="1"/>
 
+        <menuitem id="res_partner_address_menu_contacts"
+            name="Contact Addresses"
+            action="action_partner_addresses"
+            parent="contacts.res_partner_menu_contacts"
+            sequence="2"/>
+
         <menuitem id="res_partner_relationship_menu_contacts"
             name="Contact Relationships"
             action="action_partner_relationships"
             parent="contacts.res_partner_menu_contacts"
-            sequence="2"/>
+            sequence="3"/>
 
         <menuitem id="res_partner_alias_menu_contacts"
             name="Contact Alias Types"

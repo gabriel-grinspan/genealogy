@@ -23,11 +23,14 @@ class ResPartnerAddress(models.Model):
     ], string='Address Type')
 
     partner_ids = fields.Many2many('res.partner', string='Residents', compute='_compute_partner_ids')
-    current_partner_ids = fields.One2many('res.partner', 'current_address_id', string='Current Residents')
+    past_partner_ids = fields.Many2many('res.partner', string='Previous Residents', compute='_compute_partner_ids')
+    current_partner_ids = fields.One2many('res.partner', 'current_address_id', string='Current Residents', readonly=1)
 
     def _compute_partner_ids(self):
         for address in self:
-            address.partner_ids = self.env['res.partner'].search([('address_ids', 'in', address.id)]).ids
+            partner_ids = self.env['res.partner'].search([('address_ids', 'in', address.id)])
+            address.partner_ids = partner_ids.ids
+            address.past_partner_ids = (partner_ids - address.current_partner_ids).ids
 
     head_of_household_id = fields.Many2one('res.partner', string='Head of Household')
     head_of_household_id_image_128 = fields.Image(related='head_of_household_id.image_128')

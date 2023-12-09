@@ -1,11 +1,6 @@
 from odoo import models, fields, api
-from odoo.osv import expression
-
 import requests
-# import datetime
-import logging
 
-_logger = logging.getLogger(__name__)
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
@@ -68,22 +63,21 @@ class ResPartner(models.Model):
 
     father_id = fields.Many2one('res.partner', string='Father')
     mother_id = fields.Many2one('res.partner', string='Mother')
+    children_ids = fields.Many2many('res.partner', string='Children', compute='_compute_children_ids', readonly=True)
+    
+    def _compute_children_ids(self):
+        for partner in self:
+            partner.children_ids = self.search([
+                '|',
+                    ('father_id', '=', partner.id),
+                    ('mother_id', '=', partner.id),
+            ], order='date_of_birth').ids
     
     spouse_type = fields.Selection([
         ('male', 'Husband'),
         ('female', 'Wife'),
         ('mixed', 'Mixed'),
     ], compute='_compute_spouse_type')
-    relationship_ids = fields.Many2many(
-        'res.partner.relationship',
-        string='Relationships',
-        compute='_compute_relationship_ids',
-        inverse='_set_relationship_ids',
-    )
-    # TODO: fix relationships and test
-    children_ids = fields.Many2many('res.partner', string='Children', compute='_compute_children_ids', readonly=True)
-    spouse_ids = fields.Many2many('res.partner', string='Current Relationship(s)', compute='_compute_spouse_ids')
-    # END TODO
 
     def _compute_spouse_type(self):
         for partner in self:
@@ -98,14 +92,13 @@ class ResPartner(models.Model):
                     spouse_type = 'female'
 
             partner.spouse_type = spouse_type
-    
-    def _compute_children_ids(self):
-        for partner in self:
-            partner.children_ids = self.search([
-                '|',
-                    ('father_id', '=', partner.id),
-                    ('mother_id', '=', partner.id),
-            ], order='date_of_birth').ids
+
+    relationship_ids = fields.Many2many(
+        'res.partner.relationship',
+        string='Relationships',
+        compute='_compute_relationship_ids',
+        inverse='_set_relationship_ids',
+    )
 
     def _compute_relationship_ids(self):
         for partner in self:
@@ -117,6 +110,8 @@ class ResPartner(models.Model):
 
     def _set_relationship_ids(self):
         pass
+
+    spouse_ids = fields.Many2many('res.partner', string='Current Relationship(s)', compute='_compute_spouse_ids')
 
     def _compute_spouse_ids(self):
         for partner in self:
