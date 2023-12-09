@@ -3,3 +3,4 @@ access_res_partner_relationship_manager,res.partner.relationship.manager,model_r
 access_res_partner_address_manager,res.partner.address.manager,model_res_partner_address,base.group_partner_manager,1,1,1,1
 access_res_partner_alias_manager,res.partner.alias.manager,model_res_partner_alias,base.group_partner_manager,1,1,1,1
 access_res_partner_alias_type_manager,res.partner.alias.type.manager,model_res_partner_alias_type,base.group_partner_manager,1,1,1,1
+access_res_partner_relationship_wizard_manager,res.partner.relationship.wizard.manager,model_res_partner_relationship_wizard,base.group_partner_manager,1,1,1,1

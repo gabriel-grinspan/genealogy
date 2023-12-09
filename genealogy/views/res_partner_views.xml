@@ -65,19 +65,53 @@
                             <field name="death_after_sunset" />
                             <field name="lunisolar_date_of_death" />
                         </group>
+                    </page>
 
-                        <group string="Parents">
-                            <field name="father_id" domain="[('id', 'not in', [id, mother_id]), ('id', 'not in', children_ids)]" />
-                            <field name="mother_id" domain="[('id', 'not in', [id, father_id]), ('id', 'not in', children_ids)]" />
+                    <page name="relationships" string="Relationships">
+                        <group string="Parents" colspan="2">
+                            <field name="father_id" domain="[
+                                ('id', 'not in', [id, mother_id]),
+                                ('id', 'not in', children_ids),
+                                ('sex', '!=', 'female'),
+                            ]" />
+                            <field name="mother_id" domain="[
+                                ('id', 'not in', [id, father_id]),
+                                ('id', 'not in', children_ids),
+                                ('sex', '!=', 'male'),
+                            ]" />
                         </group>
 
-                        <label for="spouse_ids" />
-                        <field name="spouse_ids" domain="[('id', 'not in', [id, father_id, mother_id]), ('id', 'not in', children_ids)]" widget="many2many_tags" />
-                        <label for="relationship_ids" />
-                        <field name="relationship_ids" context="{'partner_id': id}" />
+                        <!-- <label for="spouse_ids" />
+                        <field name="spouse_ids" domain="[
+                            ('id', 'not in', [id, father_id, mother_id]),
+                            ('id', 'not in', children_ids)
+                        ]" widget="many2many_tags" /> -->
 
-                        <label for="children_ids" />
-                        <field name="children_ids" />
+                        <!-- Couldn't figure out the proper way to do this, should only show male/female column based on current partner -->
+                        <group string="Partner History" colspan="2">
+                            <field name="relationship_ids" mode="tree" invisible="sex == 'female'">
+                                <tree>
+                                    <field name="female_id" />
+                                    <field name="status" />
+                                    <field name="start_date" />
+                                    <field name="end_date" />
+                                </tree>
+                            </field>
+                            <field name="relationship_ids" mode="tree" invisible="sex == 'male'">
+                                <tree>
+                                    <field name="male_id" />
+                                    <field name="status" />
+                                    <field name="start_date" />
+                                    <field name="end_date" />
+                                </tree>
+                            </field>
+                            <button name="action_create_relationship_wizard" type="object" string="Create Relationship" />
+                        </group>
+
+                        <group string="Children" colspan="2">
+                            <field name="children_ids">
+                            </field>
+                        </group>
                     </page>
 
                     <page name="addresses" string="Past Addresses">
@@ -96,15 +130,6 @@
                                 }"/>
                     </page>
                 </xpath>
-
-                <!-- <xpath expr="//page[@name='contact_addresses']" position="attributes">
-                    <attribute name="autofocus" value="0" />
-                    <attribute name="invisible" value="1" />
-                </xpath> -->
-
-                <!-- <xpath expr="//page[@name='sales_purchases']" position="replace">
-                    <attribute name="invisible" value="1" />
-                </xpath> -->
             </field>
         </record>
 
@@ -184,24 +209,11 @@
             </field>
         </record>
 
-        <!-- <record id="view_partner_alias_tree" model="ir.ui.view">
-            <field name="name">res.partner.alias.view.tree</field>
-            <field name="model">res.partner.alias</field>
-            <field name="arch" type="xml">
-                <tree string="Aliases" editable="bottom">
-                    <field name="sequence" widget="handle" />
-                    <field name="name" />
-                    <field name="alias_type_ids" widget="many2many_tags" />
-                </tree>
-            </field>
-        </record> -->
-
         <record id="view_partner_relationship_tree" model="ir.ui.view">
             <field name="name">res.partner.relationship.view.tree</field>
             <field name="model">res.partner.relationship</field>
             <field name="arch" type="xml">
                 <tree string="Partnerships" editable="bottom">
-                    <field name="sequence" widget="handle" />
                     <field name="male_id" />
                     <field name="female_id" />
                     <field name="status" />
@@ -216,7 +228,6 @@
             <field name="model">res.partner.alias</field>
             <field name="arch" type="xml">
                 <tree string="Partnerships">
-                    <!-- <field name="sequence" widget="handle" /> -->
                     <field name="partner_id" />
                     <field name="name" />
                     <field name="alias_type_ids" widget="many2many_tags" />
@@ -245,7 +256,7 @@
         <record id="action_partner_relationships" model="ir.actions.act_window">
             <field name="name">Contact Relationships</field>
             <field name="res_model">res.partner.relationship</field>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">tree,form</field>
         </record>
 
         <record id="action_partner_alias_types" model="ir.actions.act_window">

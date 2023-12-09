@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_res_partner_relationship_creator" model="ir.ui.view">
+            <field name="name">Create New Relationship</field>
+            <field name="model">res.partner.relationship.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Create New Relationship">
+                    <div class="container">
+                        <div class="row">
+                            <label for="partner_id" class="col-5 col-md-4 col-lg-3" />
+                            <field name="partner_id" class="col-6" />
+                        </div>
+                        <div class="row">
+                            <label for="status" class="col-5 col-md-4 col-lg-3" />
+                            <field name="status" class="col-6" />
+                        </div>
+                        <div class="row">
+                            <label for="start_date" class="col-5 col-lg-2" />
+                            <field name="start_date" class="col-6 col-lg-3" />
+                            <label for="end_date" class="col-5 col-lg-2" />
+                            <field name="end_date" class="col-6 col-lg-3" />
+                        </div>
+                    </div>
+                    <footer>
+                        <button name="create_relationship" string="Create" type="object" class="btn-primary" data-hotkey="q"/>
+                        <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="x"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

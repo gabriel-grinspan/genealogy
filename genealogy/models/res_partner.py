@@ -68,31 +68,15 @@ class ResPartner(models.Model):
     address_ids = fields.Many2many('res.partner.address', string='Addresses')
     current_address_id = fields.Many2one('res.partner.address', string='Current Address')
 
-    # @api.onchange('current_address_id')
-    # def _onchange_current_address_id(self):
-    #     fields_to_iter = [
-    #         'street',
-    #         'street2',
-    #         'zip',
-    #         'city',
-    #         'state_id',
-    #         'country_id',
-    #         'country_code',
-    #     ]
-    #     for partner in self:
-    #         for f in fields_to_iter:
-    #             setattr(partner, f, getattr(partner.current_address_id, f))
-
-    # TODO: fix relationships and test
     father_id = fields.Many2one('res.partner', string='Father')
     mother_id = fields.Many2one('res.partner', string='Mother')
-    children_ids = fields.Many2many('res.partner', string='Children', compute='_compute_children_ids', readonly=True)
     relationship_ids = fields.Many2many(
         'res.partner.relationship',
         string='Partnerships',
-        # compute='_compute_relationship_ids',
-        # inverse='_set_relationship_ids',
+        compute='_compute_relationship_ids',
     )
+    # TODO: fix relationships and test
+    children_ids = fields.Many2many('res.partner', string='Children', compute='_compute_children_ids', readonly=True)
     spouse_ids = fields.Many2many('res.partner', string='Current Relationship(s)', compute='_compute_spouse_ids')
     # END TODO
     
@@ -110,10 +94,7 @@ class ResPartner(models.Model):
                 '|',
                 ('male_id', '=', partner.id),
                 ('female_id', '=', partner.id),
-            ]).ids
-
-    # def _set_relationship_ids(self):
-    #     pass
+            ], order='start_date').ids
 
     def _compute_spouse_ids(self):
         for partner in self:
@@ -128,3 +109,13 @@ class ResPartner(models.Model):
                 ]),
             ])
             partner.spouse_ids = ((relationships.mapped('male_id') | relationships.mapped('female_id')) - partner).ids
+
+    def action_create_relationship_wizard(self):
+        self.ensure_one()
+        return {
+            'name': 'Create Relationship',
+            'type': 'ir.actions.act_window',
+            'res_model': 'res.partner.relationship.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+        }
