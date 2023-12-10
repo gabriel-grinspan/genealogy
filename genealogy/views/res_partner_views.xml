@@ -37,6 +37,8 @@
 
                 <xpath expr="//field[@name='vat']" position="before">
                     <field name="current_address_id" options="{'no_create': True}" />
+                    <field name="sex" />
+                    <field name="can_contact" />
                 </xpath>
 
                 <xpath expr="//page[@name='contact_addresses']" position="replace">
@@ -50,11 +52,6 @@
                                 </tree>
                             </field>
                             <field name="name_orig_ids" mode="kanban" domain="[('id', '!=', id)]" colspan="2" />
-                        </group>
-
-                        <group>
-                            <field name="sex" />
-                            <field name="can_contact" />
                         </group>
 
                         <group string="Dates">
@@ -84,18 +81,16 @@
                         <group string="Children" colspan="2">
                             <field name="children_ids"
                                mode="kanban"
+                               no_label="1"
                                readonly="1" />
                         </group>
 
-                        <hr />
-
-                        <label for="spouse_ids" />
-                        <field name="spouse_ids" domain="[
-                            ('id', 'not in', [id, father_id, mother_id]),
-                            ('id', 'not in', children_ids)
-                        ]" widget="many2many_tags" />
-
                         <group string="Partner History" colspan="4">
+                            <field name="spouse_ids" domain="[
+                                ('id', 'not in', [id, father_id, mother_id]),
+                                ('id', 'not in', children_ids)
+                            ]" widget="many2many_tags" />
+
                             <field name="spouse_type" invisible="1" />
                             <field name="relationship_ids" no_label="1" mode="tree" invisible="spouse_type != 'male'" widget="list_renderer_no_link">
                                 <tree editable="top" create='0'>
