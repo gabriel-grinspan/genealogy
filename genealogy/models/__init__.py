@@ -3,3 +3,4 @@ from . import address
 from . import alias
 from . import relationship
 from . import res_partner
+from . import res_partner_family

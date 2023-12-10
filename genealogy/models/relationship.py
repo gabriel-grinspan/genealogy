@@ -11,6 +11,7 @@ RELATIONSHIP_STATUSES = [
 
 class ResPartnerRelationship(models.Model):
     _name = 'res.partner.relationship'
+    _description = 'Relationship'
 
     male_id = fields.Many2one('res.partner', string='Husband')
     female_id = fields.Many2one('res.partner', string='Wife')

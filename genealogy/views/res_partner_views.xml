@@ -51,12 +51,19 @@
                     <attribute name="invisible">1</attribute>
                 </xpath>
 
+                <xpath expr="//div[@class='oe_title mb24']//h1" position="attributes">
+                    <attribute name="class">row</attribute>
+                </xpath>
+                <xpath expr="//field[@id='individual']" position="before">
+                    <label for="individual" string="First Name" />
+                </xpath>
                 <xpath expr="//field[@id='individual']" position="attributes">
-                    <attribute name="style">width: 50%;</attribute>
+                    <!-- <attribute name="class">col-4</attribute> -->
                     <attribute name="placeholder">e.g. Gabriel</attribute>
                 </xpath>
                 <xpath expr="//field[@id='individual']" position="after">
-                    <field name="last_name" style="width: 50%;" placeholder="e.g. Grinspan" />
+                    <label for="last_name">Last Name</label>
+                    <field name="last_name" placeholder="e.g. Grinspan" />
                 </xpath>
 
                 <xpath expr="//field[@name='vat']" position="before">
@@ -73,8 +80,10 @@
                                     <field name="sequence" widget="handle" />
                                     <field name="name" />
                                     <field name="alias_type_ids" widget="many2many_tags" />
+                                    <field name="note" />
                                 </tree>
                             </field>
+                            <field name="name_orig_description" colspan="2" />
                             <field name="name_orig_ids" mode="kanban" domain="[('id', '!=', id)]" colspan="2" />
                         </group>
 
@@ -89,6 +98,11 @@
                     </page>
 
                     <page name="relationships" string="Family">
+                        <group colspan="2">
+                            <field name="family_id" />
+                            <field name="family_number" />
+                        </group>
+
                         <group string="Parents" colspan="2">
                             <field name="father_id" domain="[
                                 ('id', 'not in', [id, mother_id]),
@@ -100,6 +114,19 @@
                                 ('id', 'not in', children_ids),
                                 ('sex', '!=', 'male'),
                             ]" />
+                        </group>
+
+                        <group string="Siblings" colspan="2">
+                            <field name="sibling_sequence" />
+                            <field name="sibling_ids"
+                               mode="kanban"
+                               invisible="not sibling_ids"
+                               readonly="1" />
+
+                            <field name="half_sibling_ids"
+                               mode="kanban"
+                               invisible="not half_sibling_ids"
+                               readonly="1" />
                         </group>
 
                         <group string="Children" colspan="2">

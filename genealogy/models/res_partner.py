@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 import requests
+from datetime import datetime
 
 
 class ResPartner(models.Model):
@@ -62,6 +63,8 @@ class ResPartner(models.Model):
     alias_ids = fields.One2many('res.partner.alias', 'partner_id', string='Aliases')
     name_orig_ids = fields.Many2many('res.partner', 'name_dest_id', 'name_orig_id', string='Named After')
     name_dest_ids = fields.Many2many('res.partner', 'name_orig_id', 'name_dest_id', string='Named Before', compute='_compute_name_dest_ids')
+    # TODO: make computed
+    name_orig_description = fields.Char('Named After Description')
 
     @api.depends('name_orig_ids')
     def _compute_name_dest_ids(self):
@@ -79,8 +82,56 @@ class ResPartner(models.Model):
     address_ids = fields.Many2many('res.partner.address', string='Addresses')
     current_address_id = fields.Many2one('res.partner.address', string='Current Address')
 
+    family_id = fields.Many2one('res.partner.family', string='Family')
+    family_number = fields.Integer('Family ID', readonly=True)
     father_id = fields.Many2one('res.partner', string='Father')
     mother_id = fields.Many2one('res.partner', string='Mother')
+    sibling_sequence = fields.Integer('nth Sibling')
+    sibling_ids = fields.Many2many('res.partner', string='Siblings', compute='_compute_sibling_ids', readonly=True)
+    half_sibling_ids = fields.Many2many('res.partner', string='Half Siblings', compute='_compute_sibling_ids', readonly=True)
+
+    @api.depends('father_id', 'mother_id')
+    def _compute_sibling_ids(self):
+        for partner in self:
+            partner._origin
+            if not partner.father_id and not partner.mother_id:
+                partner.sibling_ids = False
+                partner.half_sibling_ids = False
+                continue
+
+            elif not partner.father_id and partner.mother_id:
+                domain = [
+                    ('mother_id', '=', partner.mother_id.id),
+                    ('id', '!=', partner._origin.id),
+                ]
+            elif partner.father_id and not partner.mother_id:
+                domain = [
+                    ('father_id', '=', partner.father_id.id),
+                    ('id', '!=', partner._origin.id),
+                ]
+            else:
+                domain = [
+                    '|',
+                        ('father_id', '=', partner.father_id.id),
+                        ('mother_id', '=', partner.mother_id.id),
+                    ('id', '!=', partner._origin.id),
+                ]
+
+            siblings = partner.search(domain)
+
+            if len(domain) == 4:
+                full_siblings = siblings.filtered(lambda p: p.father_id.id == partner.father_id.id and p.mother_id.id == partner.mother_id.id)
+                full_siblings = full_siblings.sorted(lambda p: (
+                    p.sibling_sequence,
+                    p.date_of_birth and str(p.date_of_birth) or '',
+                ))
+            else:
+                full_siblings = partner.browse()
+            half_siblings = siblings - full_siblings
+
+            partner.sibling_ids = full_siblings.ids
+            partner.half_sibling_ids = half_siblings.ids
+
     children_ids = fields.Many2many('res.partner', string='Children', compute='_compute_children_ids', readonly=True)
     
     def _compute_children_ids(self):

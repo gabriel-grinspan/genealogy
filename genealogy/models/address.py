@@ -2,6 +2,7 @@ from odoo import models, fields, api
 
 class ResPartnerAddress(models.Model):
     _name = 'res.partner.address'
+    _description = 'Address'
     _rec_name = 'street'
 
     street = fields.Char()
@@ -13,7 +14,7 @@ class ResPartnerAddress(models.Model):
     country_code = fields.Char(related='country_id.code', string='Country Code')
     latitude = fields.Float(string='Geo Latitude', digits=(10, 7))
     longitude = fields.Float(string='Geo Longitude', digits=(10, 7))
-    phone = fields.Char(tracking=2)
+    phone = fields.Char()
     comment = fields.Text()
 
     address_type = fields.Selection([

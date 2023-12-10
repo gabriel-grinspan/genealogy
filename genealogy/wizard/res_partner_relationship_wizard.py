@@ -5,6 +5,7 @@ from odoo.exceptions import UserError
 
 class RelationshipWizard(models.TransientModel):
     _name = 'res.partner.relationship.wizard'
+    _description = 'Relationship Creation Wizard'
 
     partner_id = fields.Many2one('res.partner', string='Partner', required=True)
     status = fields.Selection(RELATIONSHIP_STATUSES, string='Relationship Status', required=True)
