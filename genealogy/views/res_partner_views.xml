@@ -140,7 +140,7 @@
                                 'default_zip': zip,
                                 'default_country_id': country_id,
                                 'default_address_type': 'home'
-                                }"/>
+                                }" />
                     </page>
                 </xpath>
             </field>
@@ -151,17 +151,17 @@
             <field name="model">res.partner.address</field>
             <field name="arch" type="xml">
                 <form string="Address">
-                    <field name="address_type" required="1" widget="radio" options="{'horizontal': true}"/>
-                    <hr/>
+                    <field name="address_type" required="1" widget="radio" options="{'horizontal': true}" />
+                    <hr />
                     <group>
                         <label for="street" string="Address" />
                         <div class="o_address_format" name="div_address">
-                            <field name="street" placeholder="Street..." class="o_address_street"/>
-                            <field name="street2" placeholder="Street 2..." class="o_address_street"/>
-                            <field name="city" placeholder="City" class="o_address_city"/>
-                            <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
-                            <field name="zip" placeholder="ZIP" class="o_address_zip"/>
-                            <field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'/>
+                            <field name="street" placeholder="Street..." class="o_address_street" />
+                            <field name="street2" placeholder="Street 2..." class="o_address_street" />
+                            <field name="city" placeholder="City" class="o_address_city" />
+                            <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}" />
+                            <field name="zip" placeholder="ZIP" class="o_address_zip" />
+                            <field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}' />
                         </div>
                         <field name="phone" widget="phone" />
                     </group>
@@ -172,21 +172,21 @@
 
                         <field name="current_partner_ids" mode="tree" colspan="2">
                             <tree>
-                                <field name="name"/>
-                                <field name="phone"/>
-                                <field name="email"/>
+                                <field name="name" />
+                                <field name="phone" />
+                                <field name="email" />
                             </tree>
                         </field>
 
                         <field name="past_partner_ids" mode="tree" colspan="2">
                             <tree>
-                                <field name="name"/>
-                                <field name="phone"/>
-                                <field name="email"/>
+                                <field name="name" />
+                                <field name="phone" />
+                                <field name="email" />
                             </tree>
                         </field>
 
-                        <field name="comment" placeholder="Internal notes..." nolabel="1" colspan="2"/>
+                        <field name="comment" placeholder="Internal notes..." nolabel="1" colspan="2" />
                     </group>
                 </form>
             </field>
@@ -197,14 +197,14 @@
             <field name="model">res.partner.address</field>
             <field name="arch" type="xml">
                 <kanban>
-                    <field name="id"/>
-                    <field name="phone"/>
-                    <field name="street"/>
-                    <field name="street2"/>
-                    <field name="city"/>
-                    <field name="zip"/>
-                    <field name="state_id"/>
-                    <field name="country_id"/>
+                    <field name="id" />
+                    <field name="phone" />
+                    <field name="street" />
+                    <field name="street2" />
+                    <field name="city" />
+                    <field name="zip" />
+                    <field name="state_id" />
+                    <field name="country_id" />
                     <field name="head_of_household_id" />
                     <field name="head_of_household_id_image_128" />
 
@@ -216,20 +216,20 @@
                                 </div>
                                 <div class="oe_kanban_details">
                                     <div>
-                                        <field name="street"/>
+                                        <field name="street" />
                                     </div>
                                     <div>
-                                        <field name="street2"/>
+                                        <field name="street2" />
                                     </div>
                                     <div>
-                                        <field name="city"/><t t-if="record.city and record.state_id">, </t>
-                                        <field name="state_id"/><t t-if="record.zip"> </t>
-                                        <field name="zip"/>
+                                        <field name="city" /><t t-if="record.city and record.state_id">, </t>
+                                        <field name="state_id" /><t t-if="record.zip"> </t>
+                                        <field name="zip" />
                                     </div>
                                     <div>
-                                        <field name="country_id"/>
+                                        <field name="country_id" />
                                     </div>
-                                    <div t-if="record.phone.raw_value">Phone: <t t-esc="record.phone.value"/></div>
+                                    <div t-if="record.phone.raw_value">Phone: <t t-esc="record.phone.value" /></div>
                                 </div>
                             </div>
                         </t>
@@ -271,7 +271,7 @@
                 <form string="Alias Types">
                     <div name="button_box" position="inside">
                         <button class="oe_stat_button" type="object" name="get_aliases" icon="fa-id-card-o">
-                            <field string="Aliases" name="alias_count" widget="statinfo"/>
+                            <field string="Aliases" name="alias_count" widget="statinfo" />
                         </button>
                     </div>
                     <group>
@@ -304,24 +304,24 @@
             name="Contacts"
             action="contacts.action_contacts"
             parent="contacts.res_partner_menu_contacts"
-            sequence="1"/>
+            sequence="1" />
 
         <menuitem id="res_partner_address_menu_contacts"
             name="Contact Addresses"
             action="action_partner_addresses"
             parent="contacts.res_partner_menu_contacts"
-            sequence="2"/>
+            sequence="2" />
 
         <menuitem id="res_partner_relationship_menu_contacts"
             name="Contact Relationships"
             action="action_partner_relationships"
             parent="contacts.res_partner_menu_contacts"
-            sequence="3"/>
+            sequence="3" />
 
         <menuitem id="res_partner_alias_menu_contacts"
             name="Contact Alias Types"
             action="action_partner_alias_types"
             parent="contacts.res_partner_menu_config"
-            sequence="2"/>
+            sequence="2" />
     </data>
 </odoo>
