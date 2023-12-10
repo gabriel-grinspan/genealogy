@@ -5,6 +5,24 @@ import requests
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    @api.model
+    def default_get(self, default_fields):
+        """Add the company of the parent as default if we are creating a child partner.
+        Also take the parent lang by default if any, otherwise, fallback to default DB lang."""
+        values = super(ResPartner, self).default_get(default_fields)
+
+        if 'is_company' in default_fields:
+            values['is_company'] = False
+
+        return values
+
+    last_name = fields.Char('Last Name')
+
+    @api.depends('is_company', 'name', 'parent_id.name', 'type', 'company_name', 'commercial_company_name', 'last_name')
+    def _compute_complete_name(self):
+        for partner in self:
+            partner.complete_name = f'{partner.name or ""} {partner.last_name or ""}'.strip()
+
     date_of_birth = fields.Date('Date of Birth')
     birth_after_sunset = fields.Boolean()
     lunisolar_date_of_birth = fields.Char(compute='_compute_lunisolar_date_of_birth', string='Hebrew Date of Birth')
