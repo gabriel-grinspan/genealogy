@@ -41,7 +41,7 @@ class Relative(models.Model):
     street = fields.Char(related='current_address_id.street', readonly=True)
     street2 = fields.Char(related='current_address_id.street2', readonly=True)
     zip = fields.Char(related='current_address_id.zip', readonly=True)
-    city = fields.Char(related='current_address_id.city', readonly=True)
+    city_name_id = fields.Many2one(related='current_address_id.city_name_id', readonly=True)
     state_id = fields.Many2one(related='current_address_id.state_id', readonly=True)
     country_id = fields.Many2one(related='current_address_id.country_id', readonly=True)
     country_code = fields.Char(related='current_address_id.country_code', readonly=True)

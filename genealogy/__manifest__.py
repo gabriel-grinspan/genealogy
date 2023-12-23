@@ -29,6 +29,7 @@
         # 'views/res_partner_views.xml',
         'views/relative_address_views.xml',
         'views/relative_alias_views.xml',
+        'views/relative_city_views.xml',
         'views/relative_relationship_views.xml',
         'views/genealogy_menu_items.xml',
         'views/relative_views.xml',

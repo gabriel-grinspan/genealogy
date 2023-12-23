@@ -77,7 +77,7 @@
 									<div class="o_address_format">
 										<field name="current_address_id" placeholder="Street..." class="o_address_street"/>
 										<field name="street2" placeholder="Street 2..." class="o_address_street"/>
-										<field name="city" placeholder="City" class="o_address_city"/>
+										<field name="city_name_id" placeholder="City" class="o_address_city"/>
 										<field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
 										<field name="zip" placeholder="ZIP" class="o_address_zip"/>
 										<div class="d-flex justify-content-between">
@@ -191,7 +191,7 @@
 										'default_relative_id': active_id,
 										'default_street': street,
 										'default_street2': street2,
-										'default_city': city,
+										'default_city_id': city_name_id,
 										'default_state_id': state_id,
 										'default_zip': zip,
 										'default_country_id': country_id,
@@ -241,7 +241,7 @@
 					<field name="street"/>
 					<field name="street2"/>
 					<field name="zip"/>
-					<field name="city"/>
+					<field name="city_name_id"/>
 					<field name="country_id"/>
 					<field name="state_id"/>
 					<field name="image_128"/>
@@ -258,8 +258,8 @@
 									<div t-if="record.email.raw_value"><field name="email" widget="email"/></div>
 									<div>
 										<div>
-											<field name="zip"/><t t-if="record.city"> </t>
-											<field name="city"/>
+											<field name="zip"/><t t-if="record.city_name_id"> </t>
+											<field name="city_name_id"/>
 										</div>
 										<field t-if="record.state_id.raw_value" name="state_id"/><t t-if="record.country_id"> </t>
 										<field name="country_id"/>

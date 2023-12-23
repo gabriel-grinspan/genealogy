@@ -8,7 +8,7 @@ class RelativeAddress(models.Model):
     street = fields.Char()
     street2 = fields.Char()
     zip = fields.Char(change_default=True)
-    city = fields.Char()
+    city_name_id = fields.Many2one('relative.city.name', string='City', ondelete='restrict', domain="[('country_id', '=?', country_id), ('state_id', '=?', state_id)]")
     state_id = fields.Many2one('res.country.state', string='State', ondelete='restrict', domain="[('country_id', '=?', country_id)]")
     country_id = fields.Many2one('res.country', string='Country', ondelete='restrict')
     country_code = fields.Char(related='country_id.code', string='Country Code')
@@ -28,12 +28,41 @@ class RelativeAddress(models.Model):
     past_relative_ids = fields.Many2many('relative', string='Previous Residents', compute='_compute_relative_ids')
     current_relative_ids = fields.One2many('relative', 'current_address_id', string='Current Residents', readonly=True)
 
+    head_of_household_id = fields.Many2one('relative', string='Head of Household')
+    head_of_household_id_image_128 = fields.Image(related='head_of_household_id.image_128')
+
     def _compute_relative_ids(self):
         for address in self:
             relative_ids = self.env['relative'].search([('address_ids', 'in', address.id)])
             address.relative_ids = relative_ids.ids
             address.past_relative_ids = (relative_ids - address.current_relative_ids).ids
 
-    head_of_household_id = fields.Many2one('relative', string='Head of Household')
-    head_of_household_id_image_128 = fields.Image(related='head_of_household_id.image_128')
+    @api.onchange('city_name_id')
+    def onchange_city_names_id(self):
+        if self.city_name_id.country_id:
+            self.country_id = self.city_name_id.country_id
+        
+        if self.city_name_id.state_id:
+            self.state_id = self.city_name_id.state_id
+        
+    @api.onchange('state_id')
+    def onchange_state_id(self):
+        if self.state_id.country_id:
+            self.country_id = self.state_id.country_id
+        
+        if not self.state_id:
+            return
 
+        if self.city_name_id and self.city_name_id.state_id.id != self.state_id.id:
+            self.city_name_id = False
+
+    @api.onchange('country_id')
+    def onchange_country_id(self):
+        if not self.country_id:
+            return
+
+        if self.state_id and self.state_id.country_id.id != self.country_id.id:
+            self.state_id = False
+
+        if self.city_name_id and self.city_name_id.country_id.id != self.country_id.id:
+            self.city_name_id = False

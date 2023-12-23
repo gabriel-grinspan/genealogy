@@ -1,0 +1,18 @@
+<odoo>
+	<data>
+        <!-- <record id="view_relative_city_tree" model="ir.ui.view">
+            <field name="name">relative.city.view.tree</field>
+            <field name="model">relative.city</field>
+            <field name="arch" type="xml">
+                <tree string="Partnerships" editable="bottom">
+                </tree>
+            </field>
+        </record> -->
+
+		<record id="action_genealogy_relative_city" model="ir.actions.act_window">
+			<field name="name">Cities</field>
+			<field name="res_model">relative.city</field>
+			<field name="view_mode">tree,form,pivot</field>
+		</record>
+	</data>
+</odoo>

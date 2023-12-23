@@ -87,5 +87,13 @@
 			sequence="6"
 			action="base.action_country_state"
 		/>
+
+		<menuitem
+			name="Cities"
+			id="menu_cities"
+			parent="menu_configuration"
+			sequence="7"
+			action="action_genealogy_relative_city"
+		/>
 	</data>
 </odoo>
