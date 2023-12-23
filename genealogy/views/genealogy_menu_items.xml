@@ -1,0 +1,91 @@
+<odoo>
+	<data>
+		<!-- Top menu item -->
+		<menuitem name="Genealogy" id="menu_root"/>
+		
+		<!-- actions -->
+		<menuitem
+			name="Relatives"
+			id="menu_relative"
+			parent="menu_root"
+			sequence="1"
+			action="action_genealogy_relative"
+		/>
+		<menuitem
+			name="Addresses"
+			id="menu_address"
+			parent="menu_root"
+			sequence="2"
+			action="action_genealogy_address"
+		/>
+		<menuitem
+			name="Relationships"
+			id="menu_relationship"
+			parent="menu_root"
+			sequence="3"
+			action="action_genealogy_relationship"
+		/>
+		<menuitem
+			name="Aliases"
+			id="menu_alias"
+			parent="menu_root"
+			sequence="4"
+			action="action_genealogy_alias"
+		/>
+
+		<menuitem
+			name="Configuration"
+			id="menu_configuration"
+			parent="menu_root"
+			sequence="5"
+		/>
+
+		<menuitem
+			name="Alias Types"
+			id="menu_alias_type"
+			parent="menu_configuration"
+			sequence="1"
+			action="action_genealogy_alias_type"
+		/>
+
+		<menuitem
+			name="Titles"
+			id="menu_title"
+			parent="menu_configuration"
+			sequence="2"
+			action="base.action_partner_title_contact"
+		/>
+
+		<menuitem
+			name="Tags"
+			id="menu_tag"
+			parent="menu_configuration"
+			sequence="3"
+			action="base.action_partner_category_form"
+		/>
+
+		<menuitem
+			name="Countries"
+			id="menu_countries"
+			parent="menu_configuration"
+			sequence="4"
+			action="base.action_country"
+		/>
+
+		<menuitem
+			name="Country Groups"
+			id="menu_country_groups"
+			parent="menu_configuration"
+			sequence="5"
+			action="base.action_country_group"
+		/>
+
+		<menuitem
+			name="States"
+			id="menu_states"
+			parent="menu_configuration"
+			sequence="6"
+			action="base.action_country_state"
+		/>
+	</data>
+</odoo>

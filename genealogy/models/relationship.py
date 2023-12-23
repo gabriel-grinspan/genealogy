@@ -9,12 +9,12 @@ RELATIONSHIP_STATUSES = [
     ('children', 'Have Children Together'),
 ]
 
-class ResPartnerRelationship(models.Model):
-    _name = 'res.partner.relationship'
+class RelativeRelationship(models.Model):
+    _name = 'relative.relationship'
     _description = 'Relationship'
 
-    male_id = fields.Many2one('res.partner', string='Husband')
-    female_id = fields.Many2one('res.partner', string='Wife')
+    male_id = fields.Many2one('relative', string='Husband')
+    female_id = fields.Many2one('relative', string='Wife')
     status = fields.Selection(RELATIONSHIP_STATUSES, string='Relationship Status')
     start_date = fields.Date('Start')
     end_date = fields.Date('End')

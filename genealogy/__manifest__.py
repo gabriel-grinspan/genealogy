@@ -17,19 +17,32 @@
     'version': '17.0.0.0.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['contacts'],
+    'depends': [
+        'base',
+        'web',
+        'mail',
+    ],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
-        'views/res_partner_views.xml',
-        'wizard/res_partner_relationship_wizard_views.xml',
+        # 'views/res_partner_views.xml',
+        'views/relative_address_views.xml',
+        'views/relative_alias_views.xml',
+        'views/relative_relationship_views.xml',
+        'views/genealogy_menu_items.xml',
+        'views/relative_views.xml',
+        'wizard/relative_relationship_wizard_views.xml',
     ],
 
     'assets': {
         'web.assets_backend': [
             'genealogy/static/src/js/list_renderer_no_link.js',
+            'genealogy/static/src/views/fields/boolean_emoji_field.js',
+            'genealogy/static/src/views/fields/boolean_emoji_field.xml',
         ],
+        # 'web.assets_frontend': [
+        # ],
     },
     'application': True,
 }

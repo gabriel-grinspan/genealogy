@@ -1,0 +1,298 @@
+<odoo>
+	<data>
+		<record model="ir.ui.view" id="genealogy_relative_form">
+			<field name="name">relative.view.form</field>
+			<field name="model">relative</field>
+			<field name="arch" type="xml">
+				<form>
+					<sheet>
+						<div>
+							<field name="avatar_128" invisible="1"/>
+							<field name="image_1920" widget="image" class="oe_avatar" options="{&quot;preview_image&quot;: &quot;avatar_128&quot;}"/>
+							<div class="oe_title mb24">
+								<h1>
+									<div>
+										<field
+											name="first_name"
+											class="text-break oe_inline"
+											placeholder="First Name"
+											options="{'line_breaks': False}"
+											default_focus="1"
+										/>
+										<field
+											name="last_name"
+											class="text-break oe_inline"
+											placeholder="Last Name"
+											options="{'line_breaks': False}"
+										/>
+									</div>
+								</h1>
+							</div>
+							<group name="basic_info">
+								<group>
+									<field name="title_id"/>
+									<field name="category_ids" widget="many2many_tags"/>
+									<field name="sex"/>
+									<label for="date_of_birth"/>
+									<div>
+										<field
+											name="date_of_birth"
+											class="oe_inline"
+										/>
+										<field
+											name="birth_after_sunset"
+											class="oe_inline"
+											widget="boolean_emoji"
+											options="{'false_emoji': '☀️', 'true_emoji': '🌙'}"
+										/>
+										<field
+											name="lunisolar_date_of_birth"
+											class="oe_inline"
+										/>
+									</div>
+									<label for="date_of_death"/>
+									<div>
+										<field
+											name="date_of_death"
+											class="oe_inline"
+										/>
+										<field
+											name="death_after_sunset"
+											class="oe_inline"
+											widget="boolean_emoji"
+											options="{'false_emoji': '☀️', 'true_emoji': '🌙'}"
+										/>
+										<field
+											name="lunisolar_date_of_death"
+											class="oe_inline"
+										/>
+									</div>
+								</group>
+								<group>
+									<field name="home_phone" widget="phone"/>
+									<field name="mobile_phone" widget="phone"/>
+									<field name="email" widget="email"/>
+									<field name="street" invisible="1"/>
+									<label for="current_address_id"/>
+									<div class="o_address_format">
+										<field name="current_address_id" placeholder="Street..." class="o_address_street"/>
+										<field name="street2" placeholder="Street 2..." class="o_address_street"/>
+										<field name="city" placeholder="City" class="o_address_city"/>
+										<field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
+										<field name="zip" placeholder="ZIP" class="o_address_zip"/>
+										<div class="d-flex justify-content-between">
+											<field name="country_id" placeholder="Country" class="o_address_country" options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"/>
+										</div>
+									</div>
+								</group>
+							</group>
+						</div>
+						<notebook>
+							<page name="names" string="Names">
+								<group name="nameses">
+									<field name="name_orig_description"/>
+									<field name="name_orig_ids" mode="kanban"/>
+									<field name="alias_ids" mode="tree">
+										<tree string="Aliases" editable="bottom">
+											<field name="sequence" widget="handle" />
+											<field name="name" />
+											<field name="alias_type_ids" widget="many2many_tags" />
+											<field name="note" />
+										</tree>
+									</field>
+								</group>
+							</page>
+							<page name="relationships" string="Family">
+								<group colspan="2">
+									<field name="family_id" />
+									<field name="family_number" />
+								</group>
+
+								<group string="Parents" colspan="2">
+									<field name="father_id" domain="[
+										('id', 'not in', [id, mother_id]),
+										('id', 'not in', children_ids),
+										('sex', '!=', 'female'),
+									]" />
+									<field name="mother_id" domain="[
+										('id', 'not in', [id, father_id]),
+										('id', 'not in', children_ids),
+										('sex', '!=', 'male'),
+									]" />
+								</group>
+
+								<group string="Siblings" colspan="2" invisible="not (sibling_ids or half_sibling_ids)">
+									<field name="sibling_sequence" />
+									<field
+										name="sibling_ids"
+										mode="kanban"
+										invisible="not sibling_ids"
+										readonly="1"
+									/>
+
+									<field
+										name="half_sibling_ids"
+										mode="kanban"
+										invisible="not half_sibling_ids"
+										readonly="1"
+									/>
+								</group>
+
+								<group string="Children" colspan="2">
+									<field
+										name="children_ids"
+										mode="kanban"
+										no_label="1"
+										readonly="1"
+									/>
+								</group>
+
+								<group string="Partner History" colspan="4">
+									<field name="spouse_ids" domain="[
+										('id', 'not in', [id, father_id, mother_id]),
+										('id', 'not in', children_ids)
+									]" widget="many2many_tags" />
+
+									<field name="spouse_type" invisible="1" />
+									<field name="relationship_ids" no_label="1" mode="tree" invisible="spouse_type != 'male'" widget="list_renderer_no_link">
+										<tree editable="top" create='0'>
+											<field name="female_id" readonly="1" />
+											<field name="status" />
+											<field name="start_date" />
+											<field name="end_date" />
+										</tree>
+									</field>
+									<field name="relationship_ids" mode="tree" invisible="spouse_type != 'female'" widget="list_renderer_no_link">
+										<tree editable="top" create="0">
+											<field name="male_id" readonly="1" />
+											<field name="status" />
+											<field name="start_date" />
+											<field name="end_date" />
+										</tree>
+									</field>
+									<field name="relationship_ids" mode="tree" invisible="spouse_type not in ['mixed', False] or not relationship_ids" widget="list_renderer_no_link">
+										<tree editable="top" create="0">
+											<field name="male_id" readonly="1" />
+											<field name="female_id" readonly="1" />
+											<field name="status" />
+											<field name="start_date" />
+											<field name="end_date" />
+										</tree>
+									</field>
+									<div class="alert alert-info" role="alert" invisible="relationship_ids" colspan="2">No relationship history</div>
+									<button name="action_create_relationship_wizard" type="object" string="Add Relationship" colspan="2" />
+								</group>
+							</page>
+							<page name="addresses" string="Past Addresses">
+								<label for="address_ids" />
+								<field name="address_ids"
+									mode="kanban"
+									context="{
+										'default_relative_id': active_id,
+										'default_street': street,
+										'default_street2': street2,
+										'default_city': city,
+										'default_state_id': state_id,
+										'default_zip': zip,
+										'default_country_id': country_id,
+										'default_address_type': 'home'
+										}" />
+		                    </page>
+							<page name="notes" string="Internal Notes">
+								<field
+									name="note"
+									widget="html"
+									placeholder="Internal notes"
+								/>
+							</page>
+						</notebook>
+					</sheet>
+					<div class="oe_chatter">
+						<field name="message_follower_ids"/>
+						<field name="activity_ids"/>
+						<field name="message_ids"/>
+					</div>
+				</form>
+			</field>
+		</record>
+	
+		<record model="ir.ui.view" id="genealogy_relative_tree">
+			<field name="name">relative.view.tree</field>
+			<field name="model">relative</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="name"/>
+					<field name="phone"/>
+					<field name="email"/>
+				</tree>
+			</field>
+		</record>
+	
+		<record model="ir.ui.view" id="genealogy_relative_kanban">
+			<field name="name">relative.view.kanban</field>
+			<field name="model">relative</field>
+			<field name="arch" type="xml">
+				<kanban class="o_kanban_mobile">
+					<field name="id"/>
+					<field name="name"/>
+					<field name="email"/>
+					<field name="home_phone"/>
+					<field name="mobile_phone"/>
+					<field name="street"/>
+					<field name="street2"/>
+					<field name="zip"/>
+					<field name="city"/>
+					<field name="country_id"/>
+					<field name="state_id"/>
+					<field name="image_128"/>
+					<field name="avatar_128"/>
+					<!-- fields in form x2many view to diminish requests -->
+					<templates>
+						<t t-name="kanban-box">
+							<div t-attf-class="oe_kanban_global_click">
+								<div class="o_kanban_image">
+									<img alt="Contact image" t-att-src="kanban_image('relative', 'avatar_128', record.id.raw_value)"/>
+								</div>
+								<div class="oe_kanban_details">
+									<field name="name"/>
+									<div t-if="record.email.raw_value"><field name="email" widget="email"/></div>
+									<div>
+										<div>
+											<field name="zip"/><t t-if="record.city"> </t>
+											<field name="city"/>
+										</div>
+										<field t-if="record.state_id.raw_value" name="state_id"/><t t-if="record.country_id"> </t>
+										<field name="country_id"/>
+									</div>
+									<div t-if="record.phone.raw_value"><field name="phone" widget="phone"/></div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+	
+		<record model="ir.ui.view" id="genealogy_relative_calendar">
+			<field name="name">relative.view.calendar</field>
+			<field name="model">relative</field>
+			<field name="arch" type="xml">
+				<calendar
+					date_start="date_of_birth"
+					mode="month"
+					quick_create="false"
+				>
+					<field name="title_id"/>
+					<field name="first_name"/>
+					<field name="last_name"/>
+				</calendar>
+			</field>
+		</record>
+
+		<record id="action_genealogy_relative" model="ir.actions.act_window">
+			<field name="name">Relatives</field>
+			<field name="res_model">relative</field>
+			<field name="view_mode">tree,form,kanban,pivot,calendar</field>
+		</record>
+	</data>
+</odoo>

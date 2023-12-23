@@ -1,7 +1,7 @@
 from odoo import models, fields, api
 
-class ResPartnerAddress(models.Model):
-    _name = 'res.partner.address'
+class RelativeAddress(models.Model):
+    _name = 'relative.address'
     _description = 'Address'
     _rec_name = 'street'
 
@@ -15,7 +15,7 @@ class ResPartnerAddress(models.Model):
     latitude = fields.Float(string='Geo Latitude', digits=(10, 7))
     longitude = fields.Float(string='Geo Longitude', digits=(10, 7))
     phone = fields.Char()
-    comment = fields.Text()
+    note = fields.Html()
 
     address_type = fields.Selection([
         ('home', 'Home Address'),
@@ -24,16 +24,16 @@ class ResPartnerAddress(models.Model):
         ('burial_plot', 'Burial Plot'),
     ], string='Address Type')
 
-    partner_ids = fields.Many2many('res.partner', string='Residents', compute='_compute_partner_ids')
-    past_partner_ids = fields.Many2many('res.partner', string='Previous Residents', compute='_compute_partner_ids')
-    current_partner_ids = fields.One2many('res.partner', 'current_address_id', string='Current Residents', readonly=True)
+    relative_ids = fields.Many2many('relative', string='Residents', compute='_compute_relative_ids')
+    past_relative_ids = fields.Many2many('relative', string='Previous Residents', compute='_compute_relative_ids')
+    current_relative_ids = fields.One2many('relative', 'current_address_id', string='Current Residents', readonly=True)
 
-    def _compute_partner_ids(self):
+    def _compute_relative_ids(self):
         for address in self:
-            partner_ids = self.env['res.partner'].search([('address_ids', 'in', address.id)])
-            address.partner_ids = partner_ids.ids
-            address.past_partner_ids = (partner_ids - address.current_partner_ids).ids
+            relative_ids = self.env['relative'].search([('address_ids', 'in', address.id)])
+            address.relative_ids = relative_ids.ids
+            address.past_relative_ids = (relative_ids - address.current_relative_ids).ids
 
-    head_of_household_id = fields.Many2one('res.partner', string='Head of Household')
+    head_of_household_id = fields.Many2one('relative', string='Head of Household')
     head_of_household_id_image_128 = fields.Image(related='head_of_household_id.image_128')
 

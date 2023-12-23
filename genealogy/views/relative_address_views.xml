@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<record id="address_view_form" model="ir.ui.view">
+			<field name="name">relative.address.view.form</field>
+			<field name="model">relative.address</field>
+			<field name="arch" type="xml">
+				<form string="Address">
+					<field name="address_type" required="1" widget="radio" options="{'horizontal': true}" />
+					<hr />
+					<group>
+						<label for="street" string="Address" />
+						<div class="o_address_format" name="div_address">
+							<field name="street" placeholder="Street..." class="o_address_street" />
+							<field name="street2" placeholder="Street 2..." class="o_address_street" />
+							<field name="city" placeholder="City" class="o_address_city" />
+							<field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}" />
+							<field name="zip" placeholder="ZIP" class="o_address_zip" />
+							<field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}' />
+						</div>
+						<field name="phone" widget="phone" />
+					</group>
+
+					<group name="residents" string="Residents">
+						<field name="relative_ids" invisible="1" />
+						<field name="head_of_household_id" domain="[('id', 'in', relative_ids)]" />
+
+						<field name="current_relative_ids" mode="kanban" colspan="2"/>
+
+						<field name="past_relative_ids" mode="kanban" colspan="2"/>
+
+						<field name="note" placeholder="Internal notes" nolabel="1" colspan="2" />
+					</group>
+				</form>
+			</field>
+		</record>
+		<record id="address_view_kanban" model="ir.ui.view">
+			<field name="name">relative.address.view.kanban</field>
+			<field name="model">relative.address</field>
+			<field name="arch" type="xml">
+				<kanban>
+					<field name="id" />
+					<field name="phone" />
+					<field name="street" />
+					<field name="street2" />
+					<field name="city" />
+					<field name="zip" />
+					<field name="state_id" />
+					<field name="country_id" />
+					<field name="head_of_household_id" />
+					<field name="head_of_household_id_image_128" />
+
+					<templates>
+						<t t-name="kanban-box">
+							<div class="color oe_kanban_global_click">
+								<div class="o_kanban_image">
+									<img alt="Contact image" t-att-src="kanban_image('relative', 'image_128', record.head_of_household_id.raw_value)" />
+								</div>
+								<div class="oe_kanban_details">
+									<div>
+										<field name="street" />
+									</div>
+									<div>
+										<field name="street2" />
+									</div>
+									<div>
+										<field name="city" /><t t-if="record.city and record.state_id">, </t>
+										<field name="state_id" /><t t-if="record.zip"> </t>
+										<field name="zip" />
+									</div>
+									<div>
+										<field name="country_id" />
+									</div>
+									<div t-if="record.phone.raw_value">Phone: <t t-esc="record.phone.value" /></div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+		<record id="action_genealogy_address" model="ir.actions.act_window">
+			<field name="name">Addresses</field>
+			<field name="res_model">relative.address</field>
+			<field name="view_mode">tree,form,kanban,pivot</field>
+		</record>
+	</data>
+</odoo>

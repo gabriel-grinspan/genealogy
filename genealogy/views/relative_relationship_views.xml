@@ -1,0 +1,23 @@
+<odoo>
+	<data>
+        <record id="view_relative_relationship_tree" model="ir.ui.view">
+            <field name="name">relative.relationship.view.tree</field>
+            <field name="model">relative.relationship</field>
+            <field name="arch" type="xml">
+                <tree string="Partnerships" editable="bottom">
+                    <field name="male_id" />
+                    <field name="female_id" />
+                    <field name="status" />
+                    <field name="start_date" />
+                    <field name="end_date" />
+                </tree>
+            </field>
+        </record>
+
+		<record id="action_genealogy_relationship" model="ir.actions.act_window">
+			<field name="name">Relationships</field>
+			<field name="res_model">relative.relationship</field>
+			<field name="view_mode">tree,form,pivot</field>
+		</record>
+	</data>
+</odoo>

@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-from . import res_partner_relationship_wizard
+from . import relative_relationship_wizard
