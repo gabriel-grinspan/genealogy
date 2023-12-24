@@ -10,6 +10,7 @@ class RelativeCity(models.Model):
     name = fields.Char('Name', related='name_id.name')
     state_id = fields.Many2one('res.country.state', string='Current State', related='name_id.state_id')
     country_id = fields.Many2one('res.country', string='Current Country', related='name_id.country_id')
+    note = fields.Html('Notes')
 
     @api.onchange('name_id')
     def _set_name_id(self):
@@ -33,7 +34,7 @@ class RelativeCityName(models.Model):
     name = fields.Char('Name')
     state_id = fields.Many2one('res.country.state', string='State', domain="[('country_id', '=?', country_id)]")
     country_id = fields.Many2one('res.country', string='Country')
-    city_id = fields.Many2one('relative.city', string='City', compute='_compute_city_id')
+    city_id = fields.Many2one('relative.city', string='Current Name', compute='_compute_city_id')
 
     def _compute_city_id(self):
         for city in self:

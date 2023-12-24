@@ -33,6 +33,7 @@
         'views/relative_relationship_views.xml',
         'views/genealogy_menu_items.xml',
         'views/relative_views.xml',
+        'views/res_country_views.xml',
         'wizard/relative_relationship_wizard_views.xml',
     ],
 

@@ -10,6 +10,7 @@
                         <field name="state_id" />
                         <field name="country_id" />
                         <field name="name_ids" mode="tree" />
+                        <field name="note" />
                     </group>
                 </form>
             </field>
@@ -37,9 +38,9 @@
                 <tree string="City Name">
                     <field name="sequence" widget="handle" />
                     <field name="name" />
-                    <field name="city_id" />
                     <field name="state_id" />
                     <field name="country_id" />
+                    <field name="city_id" />
                 </tree>
             </field>
         </record>
