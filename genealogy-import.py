@@ -11,6 +11,9 @@ RELATIVE = self.env['relative']
 FAMILY = self.env['relative.family']
 ALIAS_TYPE = self.env['relative.alias.type']
 ALIAS = self.env['relative.alias']
+COUNTRY = self.env['res.country']
+
+relative_map = {}
 
 
 def get_cell_with_sheet(sheet, row, col):
@@ -31,10 +34,48 @@ def get_cell_with_sheet(sheet, row, col):
         return str(cell.value).strip()
 
 def get_relative(family_code, relative_number):
-    return RELATIVE.search([
-        ('family_id.code', '=', family_code),
-        ('family_number', '=', relative_number),
-    ])
+    relative_code = family_code+relative_number
+    relative = relative_map.get((relative_code))
+    if not relative:
+        relative = RELATIVE.search([
+            ('family_id.code', '=', family_code),
+            ('family_number', '=', relative_number),
+        ])
+        relative_map[relative_code] = relative
+    return relative
+
+def get_address(street, city, state, zipcode, country, address_type):
+    country_id = False
+    if country:
+        country_name = {
+            'USA': 'United States',
+            'UK': 'United Kingdom',
+            'uK': 'United Kingdom',
+            'London': 'United Kingdom', # this is a mistake
+            'Palestine': 'State of Palestine',
+            'Russia': 'Russian Federation',
+            'Austria-Hungary': ('Austria-Hungary', 'AHHH'),
+            'Czechoslovakia': ('Czechoslovakia', 'CSHH'),
+            'BSSR': ('Byelorussian Soviet Socialist Republic', 'BYAA'),
+            'USSR': ('Union of Soviet Socialist Republics', 'SUHH'),
+            'West Germany': ('West Germany', 'DEDE'),
+        }.get(country) or country
+        country_code = ''
+        if type(country_name) == tuple:
+            country_code = country_name[1]
+            country_name = country_name[0]
+        
+        country_id = COUNTRY.search([
+            '|',
+                ('name', '=', country_name),
+                ('code', '=', country_code),
+        ])
+
+        if not country_id and country_name and country_code:
+            country_id = COUNTRY.create({
+                'name': country_name,
+                'code': country_code,
+            })
 
 def import_persons(sheet):
     def get_cell(row, col):
@@ -94,7 +135,7 @@ def import_persons(sheet):
         phone_last8 = get_cell(row, 20)
         blood_related = get_cell(row, 21)
         sex = get_cell(row, 22)
-        alive = get_cell(row, 23)
+        # alive = get_cell(row, 23)
         head_of_household = get_cell(row, 24)
         has_picture = get_cell(row, 25)
         living_with = get_cell(row, 26)

@@ -65,10 +65,26 @@
 		/>
 
 		<menuitem
+			name="Cities"
+			id="menu_cities"
+			parent="menu_configuration"
+			sequence="4"
+			action="action_genealogy_relative_city"
+		/>
+
+		<menuitem
+			name="States"
+			id="menu_states"
+			parent="menu_configuration"
+			sequence="5"
+			action="base.action_country_state"
+		/>
+
+		<menuitem
 			name="Countries"
 			id="menu_countries"
 			parent="menu_configuration"
-			sequence="4"
+			sequence="6"
 			action="base.action_country"
 		/>
 
@@ -76,24 +92,8 @@
 			name="Country Groups"
 			id="menu_country_groups"
 			parent="menu_configuration"
-			sequence="5"
-			action="base.action_country_group"
-		/>
-
-		<menuitem
-			name="States"
-			id="menu_states"
-			parent="menu_configuration"
-			sequence="6"
-			action="base.action_country_state"
-		/>
-
-		<menuitem
-			name="Cities"
-			id="menu_cities"
-			parent="menu_configuration"
 			sequence="7"
-			action="action_genealogy_relative_city"
+			action="base.action_country_group"
 		/>
 	</data>
 </odoo>
