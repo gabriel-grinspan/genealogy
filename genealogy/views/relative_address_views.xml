@@ -23,7 +23,7 @@
 
 					<group name="residents" string="Residents">
 						<field name="relative_ids" invisible="1" />
-						<field name="head_of_household_id" domain="[('id', 'in', relative_ids)]" />
+						<field name="head_of_household_id" />
 
 						<field name="current_relative_ids" mode="kanban" colspan="2"/>
 

@@ -1,13 +1,48 @@
 <odoo>
 	<data>
-        <!-- <record id="view_relative_city_tree" model="ir.ui.view">
-            <field name="name">relative.city.view.tree</field>
+        <record id="view_relative_city_form" model="ir.ui.view">
+            <field name="name">relative.city.view.form</field>
             <field name="model">relative.city</field>
             <field name="arch" type="xml">
-                <tree string="Partnerships" editable="bottom">
+                <form string="City">
+                    <group>
+                        <field name="name_id" />
+                        <field name="state_id" />
+                        <field name="country_id" />
+                        <field name="name_ids" mode="tree" />
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_relative_city_name_form" model="ir.ui.view">
+            <field name="name">relative.city.name.view.form</field>
+            <field name="model">relative.city.name</field>
+            <field name="arch" type="xml">
+                <form string="City Name">
+                    <group>
+                        <field name="name" />
+                        <field name="city_id" />
+                        <field name="state_id" />
+                        <field name="country_id" />
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_relative_city_name_tree" model="ir.ui.view">
+            <field name="name">relative.city.name.view.tree</field>
+            <field name="model">relative.city.name</field>
+            <field name="arch" type="xml">
+                <tree string="City Name">
+                    <field name="sequence" widget="handle" />
+                    <field name="name" />
+                    <field name="city_id" />
+                    <field name="state_id" />
+                    <field name="country_id" />
                 </tree>
             </field>
-        </record> -->
+        </record>
 
 		<record id="action_genealogy_relative_city" model="ir.actions.act_window">
 			<field name="name">Cities</field>

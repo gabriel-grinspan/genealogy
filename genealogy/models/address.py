@@ -22,13 +22,13 @@ class RelativeAddress(models.Model):
         ('birthplace', 'Birthplace'),
         ('death', 'Place of Death'),
         ('burial_plot', 'Burial Plot'),
-    ], string='Address Type')
+    ], default='home', string='Address Type')
 
     relative_ids = fields.Many2many('relative', string='Residents', compute='_compute_relative_ids')
     past_relative_ids = fields.Many2many('relative', string='Previous Residents', compute='_compute_relative_ids')
     current_relative_ids = fields.One2many('relative', 'current_address_id', string='Current Residents', readonly=True)
 
-    head_of_household_id = fields.Many2one('relative', string='Head of Household')
+    head_of_household_id = fields.Many2one('relative', string='Head of Household', domain="[('id', 'in', current_relative_ids)]")
     head_of_household_id_image_128 = fields.Image(related='head_of_household_id.image_128')
 
     def _compute_relative_ids(self):
@@ -38,7 +38,7 @@ class RelativeAddress(models.Model):
             address.past_relative_ids = (relative_ids - address.current_relative_ids).ids
 
     @api.onchange('city_name_id')
-    def onchange_city_names_id(self):
+    def _onchange_city_names_id(self):
         if self.city_name_id.country_id:
             self.country_id = self.city_name_id.country_id
         
@@ -46,23 +46,29 @@ class RelativeAddress(models.Model):
             self.state_id = self.city_name_id.state_id
         
     @api.onchange('state_id')
-    def onchange_state_id(self):
+    def _onchange_state_id(self):
         if self.state_id.country_id:
             self.country_id = self.state_id.country_id
         
         if not self.state_id:
             return
 
-        if self.city_name_id and self.city_name_id.state_id.id != self.state_id.id:
+        if self.city_name_id and not self.city_name_id.state_id:
+            self.city_name_id.state_id = self.state_id
+        elif self.city_name_id and self.city_name_id.state_id.id != self.state_id.id:
             self.city_name_id = False
 
     @api.onchange('country_id')
-    def onchange_country_id(self):
+    def _onchange_country_id(self):
         if not self.country_id:
             return
 
-        if self.state_id and self.state_id.country_id.id != self.country_id.id:
+        if self.state_id and not self.state_id.country_id:
+            self.state_id.country_id = self.country_id
+        elif self.state_id and self.state_id.country_id.id != self.country_id.id:
             self.state_id = False
 
-        if self.city_name_id and self.city_name_id.country_id.id != self.country_id.id:
+        if self.city_name_id and not self.city_name_id.country_id:
+            self.city_name_id.country_id = self.country_id
+        elif self.city_name_id and self.city_name_id.country_id.id != self.country_id.id:
             self.city_name_id = False
