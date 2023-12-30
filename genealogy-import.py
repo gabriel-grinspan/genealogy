@@ -4,6 +4,9 @@ import logging
 import re
 import requests
 import xlrd
+from datetime import datetime
+import phonenumbers
+from odoo.exceptions import ValidationError
 
 
 _logger = logging.getLogger(__name__)
@@ -13,8 +16,8 @@ ALIAS_TYPE = self.env['relative.alias.type']
 ALIAS = self.env['relative.alias']
 COUNTRY = self.env['res.country']
 STATE = self.env['res.country.state']
-CITY = self.env['reltive.city']
-CITY_NAME = self.env['reltive.city.name']
+CITY = self.env['relative.city']
+CITY_NAME = self.env['relative.city.name']
 ADDRESS = self.env['relative.address']
 
 relative_map = {}
@@ -63,7 +66,9 @@ def populate_state_name_map(sheet):
         state_map[state_code] = state_name
 
 def get_state(name, country):
-    state_name = state_map.get(name)
+    if not name:
+        return False
+    state_name = state_map.get(name) or name
     state_code = name
     state_id = STATE.search([
         '|',
@@ -71,7 +76,7 @@ def get_state(name, country):
             ('code', '=', state_code),
         ('country_id', '=', country.id)
     ])
-
+    # _logger.info(f'{state_name}, {state_code}, {country.name}')
     if not state_id:
         state_id = STATE.create({
             'name': state_name,
@@ -114,10 +119,10 @@ def populate_city_names(sheet):
 
         return city_name_id
 
-    germany_id = COUNTRY.search([('code', '=', 'DE')]).id
-    hungary_id = COUNTRY.search([('code', '=', 'HU')]).id
-    czechia_id = COUNTRY.search([('code', '=', 'CZ')]).id
-    russia_id = COUNTRY.search([('code', '=', 'RU')]).id
+    germany_id = COUNTRY.search([('code', '=', 'DE')])
+    hungary_id = COUNTRY.search([('code', '=', 'HU')])
+    czechia_id = COUNTRY.search([('code', '=', 'CZ')])
+    russia_id = COUNTRY.search([('code', '=', 'RU')])
 
     for row in range(sheet.nrows):
         if row == 0:
@@ -135,6 +140,7 @@ def populate_city_names(sheet):
         country_id = COUNTRY.search([
             ('name', '=', current_country)
         ])
+        _logger.info(f'{current_state}, {country_id.name}, {row}')
         state_id = get_state(current_state, country_id)
         current_name_id = get_create_city_name(current_name, state_id, country_id, note, current_name)
 
@@ -162,7 +168,7 @@ def get_city(name, state_id, country_id):
     if not city_name_id:
         CITY_NAME.create({
             'name': name,
-            'state_id': state_id.id,
+            'state_id': state_id and state_id.id,
             'country_id': country_id.id,
         })
 
@@ -215,27 +221,66 @@ def get_address(street, city, state, zipcode, country, address_type):
         if city_name_id and not city_name_id.state_id and state_id:
             city_name_id.state_id = state_id.id
 
+    if not type(city_name_id) == bool and city_name_id.ids == []:
+        city_name_id = False
+    # _logger.info(f'{city_name_id}, {city_name_id.ids}, {city_name_id.ids == []}')
     address_id = ADDRESS.search([
         ('street', '=', street),
-        ('city_name_id', '=', city_name_id),
-        ('state_id', '=', state_id),
+        ('city_name_id', '=', city_name_id and city_name_id.id),
+        ('state_id', '=', state_id and state_id.id),
         ('zip', '=', zipcode),
-        ('country_id', '=', country_id),
+        ('country_id', '=', country_id.id),
         ('address_type', '=', address_type),
     ])
 
     if not address_id:
         address_id = ADDRESS.create({
             'street': street,
-            'city_name_id': city_name_id,
-            'state_id': state_id,
+            'city_name_id': city_name_id and city_name_id.id,
+            'state_id': state_id and state_id.id,
             'zip': zipcode,
-            'country_id': country_id,
+            'country_id': country_id.id,
             'address_type': address_type,
         })
 
     return address_id
 
+
+def get_datetime(date: str):
+    if date == '0':
+        return False, False
+    try:
+        return datetime.strptime(date,'%Y%m%d'), False
+    except:
+        try:
+            return datetime.strptime(date,'%Y%m00'), True
+        except:
+            return datetime.strptime(date,'%Y0000'), True
+
+def compare_hebrew_date(date: datetime, hebrew_date: str) -> bool:
+    request_url = f'https://www.hebcal.com/converter?cfg=json&g2h=1&strict=1&date={date.strftime("%Y-%m-%d")}'
+    _logger.info('requesting')
+    response = requests.get(request_url).json()
+    hebrew_day = int(hebrew_date[-2:])
+    res_hebrew_day = response.get('hd')
+    if res_hebrew_day == hebrew_day:
+        return False
+    if res_hebrew_day + 1 == hebrew_day:
+        return True
+
+    request_url = request_url[:-2] + str(int(request_url[-2:]) + 1)
+    _logger.info('requesting?')
+    response = requests.get(request_url).json()
+    if res_hebrew_day == hebrew_day:
+        return True
+
+    raise ValidationError(f'What day is it man?\n\n{date} {hebrew_date}')
+
+def get_sex(nice):
+    return {
+        'M': 'male',
+        'F': 'female',
+    }.get(nice)
 
 def import_persons(sheet):
     def get_cell(row, col):
@@ -263,6 +308,7 @@ def import_persons(sheet):
         })
 
     output = RELATIVE
+    error_log = []
 
     alias_type_jewish = search_create_record(ALIAS_TYPE, 'Jewish')
     alias_type_nickname = search_create_record(ALIAS_TYPE, 'Nickname')
@@ -284,7 +330,7 @@ def import_persons(sheet):
         country_of_birth = get_cell(row, 9)
         date_of_birth = get_cell(row, 10)
         jewish_date_of_birth = get_cell(row, 11)
-        married = get_cell(row, 12)
+        # married = get_cell(row, 12)
         street_of_residence = get_cell(row, 13)
         city_of_residence = get_cell(row, 14)
         state_of_residence = get_cell(row, 15)
@@ -292,7 +338,7 @@ def import_persons(sheet):
         country_of_residence = get_cell(row, 17)
         phone_country_code = get_cell(row, 18)
         phone_area_code = get_cell(row, 19)
-        phone_last8 = get_cell(row, 20)
+        phone_last7 = get_cell(row, 20)
         blood_related = get_cell(row, 21)
         sex = get_cell(row, 22)
         # alive = get_cell(row, 23)
@@ -310,17 +356,37 @@ def import_persons(sheet):
             'code': family_code,
         })
 
-        relative_id = RELATIVE.search({
+        relative_id = RELATIVE.search([
+            ('family_id', '=', family.id),
+            ('family_number', '=', relative_number),
+        ]) or RELATIVE.create({
             'family_id': family.id,
             'family_number': relative_number,
         })
 
         # process date of birth
 
+        date_of_birth, approximate_dob = get_datetime(date_of_birth)
+        try:
+            born_at_night = date_of_birth and not approximate_dob and compare_hebrew_date(date_of_birth, jewish_date_of_birth)
+        except Exception as error:
+            error_log.append(error)
+            born_at_night = False
+        phone = phone_country_code and phone_area_code and phone_last7 and f'+{phone_country_code}{phone_area_code}{phone_last7}'
+        try:
+            phone_number = phone and phonenumbers.format_number(phonenumbers.parse(phone), phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+        except Exception as error:
+            error_log.append(f'{phone}, {error}')
+            phone_number = False
+
         vals = {
             'first_name': first_name,
             'last_name': last_name,
             'date_of_birth': date_of_birth,
+            'date_of_birth_approximate': approximate_dob,
+            'birth_after_sunset': born_at_night,
+            'mobile_phone': phone_number,
+            'sex': get_sex(sex),
         }
 
         if not relative_id:
@@ -338,7 +404,7 @@ def import_persons(sheet):
         relative_id = get_relative(family_code, relative_number)
         output |= relative_id
 
-    return output
+    return output, error_log
 
 
 attachment = self.env['ir.attachment'].browse(215)  # change id before running
