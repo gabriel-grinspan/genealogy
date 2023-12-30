@@ -259,7 +259,7 @@ def get_datetime(date: str):
 
 def compare_hebrew_date(date: datetime, hebrew_date: str) -> bool:
     request_url = f'https://www.hebcal.com/converter?cfg=json&g2h=1&strict=1&date={date.strftime("%Y-%m-%d")}'
-    _logger.info('requesting')
+    _logger.info(f'requesting, {date}')
     response = requests.get(request_url).json()
     hebrew_day = int(hebrew_date[-2:])
     res_hebrew_day = response.get('hd')
@@ -268,13 +268,14 @@ def compare_hebrew_date(date: datetime, hebrew_date: str) -> bool:
     if res_hebrew_day + 1 == hebrew_day:
         return True
 
-    request_url = request_url[:-2] + str(int(request_url[-2:]) + 1)
+    request_url = request_url[:-2] + str(int(request_url[-2:]) + 1).zfill(2)
     _logger.info('requesting?')
+    _logger.info(request_url)
     response = requests.get(request_url).json()
-    if res_hebrew_day == hebrew_day:
+    if response.get('hd') == hebrew_day:
         return True
 
-    raise ValidationError(f'What day is it man?\n\n{date} {hebrew_date}')
+    raise ValidationError(f'What day is it man?\n\n{date} {hebrew_date} {response.get("hd")} != {hebrew_day}')
 
 def get_sex(nice):
     return {
@@ -316,6 +317,8 @@ def import_persons(sheet):
     for row in range(sheet.nrows):
         if row == 0:
             continue
+        # if not (680 < row < 684):
+        #     continue
 
         # variable name each column because nobody can manage this otherwise
         family_code = get_cell(row, 0)
