@@ -50,6 +50,11 @@
 											class="oe_inline"
 										/>
 									</div>
+									<field
+										name="date_of_birth_approximate"
+										widget="boolean_emoji"
+										options="{'false_emoji': '❔', 'true_emoji': '❓'}"
+									/>
 									<label for="date_of_death"/>
 									<div>
 										<field
@@ -67,6 +72,11 @@
 											class="oe_inline"
 										/>
 									</div>
+									<field
+										name="date_of_death_approximate"
+										widget="boolean_emoji"
+										options="{'false_emoji': '❔', 'true_emoji': '❓'}"
+									/>
 								</group>
 								<group>
 									<field name="home_phone" widget="phone"/>

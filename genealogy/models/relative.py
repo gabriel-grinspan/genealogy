@@ -26,12 +26,14 @@ class Relative(models.Model):
     ], string='Sex')
 
     date_of_birth = fields.Date('Date of Birth')
+    date_of_birth_approximate = fields.Boolean('Approximate Date of Birth')
     birth_after_sunset = fields.Boolean()
     lunisolar_date_of_birth = fields.Char(compute='_compute_lunisolar_date_of_birth', string='Hebrew Date of Birth')
     
     date_of_death = fields.Date('Date of Death')
     death_after_sunset = fields.Boolean()
     lunisolar_date_of_death = fields.Char(compute='_compute_lunisolar_date_of_death', string='Hebrew Date of Death')
+    date_of_death_approximate = fields.Boolean('Approximate Date of Death')
 
     home_phone = fields.Char('Home Phone')
     mobile_phone = fields.Char('Mobile Phone')
@@ -100,15 +102,15 @@ class Relative(models.Model):
         response = requests.get(request_url).json()
         return response.get('hebrew')
 
-    @api.depends('date_of_birth', 'birth_after_sunset')
+    @api.depends('date_of_birth', 'birth_after_sunset', 'date_of_birth_approximate')
     def _compute_lunisolar_date_of_birth(self):
         for relative in self:
-            relative.lunisolar_date_of_birth = self._get_lunisolar_date(relative.date_of_birth, relative.birth_after_sunset)
+            relative.lunisolar_date_of_birth = not relative.date_of_birth_approximate and self._get_lunisolar_date(relative.date_of_birth, relative.birth_after_sunset)
 
-    @api.depends('date_of_death', 'death_after_sunset')
+    @api.depends('date_of_death', 'death_after_sunset', 'date_of_death_approximate')
     def _compute_lunisolar_date_of_death(self):
         for relative in self:
-            relative.lunisolar_date_of_death = self._get_lunisolar_date(relative.date_of_death, relative.death_after_sunset)
+            relative.lunisolar_date_of_death = not relative.date_of_death_approximate and self._get_lunisolar_date(relative.date_of_death, relative.death_after_sunset)
     
     @api.depends('home_phone', 'mobile_phone')
     def _compute_phone(self):
