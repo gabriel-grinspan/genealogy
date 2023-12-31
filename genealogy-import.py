@@ -423,3 +423,11 @@ populate_city_names(city_sheet)
 person_sheet = wb.sheet_by_index(0)
 
 result = import_persons(person_sheet)
+
+parent_child_sheet = wb.sheet_by_index(1)
+alias_sheet = wb.sheet_by_index(3)
+named_after_sheet = wb.sheet_by_index(4)
+spouse_sheet = wb.sheet_by_index(5)
+email_sheet = wb.sheet_by_index(6)
+death_sheet = wb.sheet_by_index(7)
+notes_sheet = wb.sheet_by_index(10)
