@@ -24,6 +24,7 @@ relative_map = {}
 country_map = {
     'USA': 'United States',
     'UK': 'United Kingdom',
+    'Uk': 'United Kingdom',
     'uK': 'United Kingdom',
     'London': 'United Kingdom', # this is a mistake
     'Palestine': 'State of Palestine',
@@ -33,6 +34,9 @@ country_map = {
     'BSSR': ('Byelorussian Soviet Socialist Republic', 'BYAA'),
     'USSR': ('Union of Soviet Socialist Republics', 'SUHH'),
     'West Germany': ('West Germany', 'DEDE'),
+    'Yugoslavia': ('Yugoslavia', 'YUCS'),
+    'Austalia': 'Australia',
+    'Holland': 'Netherlands',
 }
 state_map = {}
 
@@ -86,24 +90,31 @@ def get_state(name, country):
         })
     return state_id
 
+def get_city(name, state_id, country_id):
+    city_name_id = CITY_NAME.search([
+        ('name', '=', name),
+        ('country_id', '=', country_id.id),
+    ])
+    _logger.info(f'city name: {name} => {city_name_id}, {state_id}, {country_id.name}')
+    if not city_name_id:
+        city_name_id = CITY_NAME.create({
+            'name': name,
+            'state_id': state_id and state_id.id,
+            'country_id': country_id.id,
+        })
+
+    return city_name_id
+
+
 def populate_city_names(sheet):
     def get_cell(row, col):
         return get_cell_with_sheet(sheet, row, col)
 
-    def get_create_city_name(name, state_id, country_id, note, current_city_name, city_id=False):
-        city_name_id = CITY_NAME.search([
-            ('name', '=', name),
-            ('state_id', '=', state_id and state_id.id or False),
-            ('country_id', '=', country_id.id),
-        ])
-        if not city_name_id:
-            city_name_id = CITY_NAME.create({
-                'name': name,
-                'state_id': state_id and state_id.id or False,
-                'country_id': country_id.id,
-            })
+    def get_create_city_name(name, state_id, country_id, note, city_id=False):
+        city_name_id = get_city(name, state_id, country_id)
         
-        if name == current_city_name and not city_id:
+        _logger.info(f'city id: {city_id}')
+        if not city_id:
             city_id = CITY.search([
                 ('name_id', '=', city_name_id.id),
             ])
@@ -111,13 +122,15 @@ def populate_city_names(sheet):
             if not city_id:
                 city_id = CITY.create({
                     'name_id': city_name_id.id,
-                    'state_id': state_id and state_id.id or False,
+                    'state_id': city_name_id.state_id.id,
                     'country_id': country_id.id,
                     'note': note,
                 })
 
+        _logger.info(f'city id: {city_id}')
         if city_id:
-            city_name_id.city_id = city_id.id
+            _logger.info(f'cityname: {city_name_id} city id: {city_name_id.city_id} -> {city_id}')
+            city_id.name_ids |= city_name_id
 
         return city_name_id
 
@@ -144,37 +157,21 @@ def populate_city_names(sheet):
         ])
         _logger.info(f'{current_state}, {country_id.name}, {row}')
         state_id = get_state(current_state, country_id)
-        current_name_id = get_create_city_name(current_name, state_id, country_id, note, current_name)
+        current_name_id = get_create_city_name(current_name, state_id, country_id, note)
 
         german_name_id = False
         hungary_name_id = False
         czech_name_id = False
         russia_name_id = False
         if german_name:
-            german_name_id = get_create_city_name(german_name, False, germany_id, False, current_name, current_name_id.city_id)
+            german_name_id = get_create_city_name(german_name, False, germany_id, False, current_name_id.city_id)
         if hungarian_name:
-            hungary_name_id = get_create_city_name(hungarian_name, False, hungary_id, False, current_name, current_name_id.city_id)
+            hungary_name_id = get_create_city_name(hungarian_name, False, hungary_id, False, current_name_id.city_id)
         if czech_name:
             if len(russian_name := czech_name.split(' (Russian)')) > 1:
-                russia_name_id = get_create_city_name(russian_name[0], False, russia_id, False, current_name, current_name_id.city_id)
+                russia_name_id = get_create_city_name(russian_name[0], False, russia_id, False, current_name_id.city_id)
             else:
-                czech_name_id = get_create_city_name(czech_name, False, czechia_id, False, current_name, current_name_id.city_id)
-
-
-def get_city(name, state_id, country_id):
-    city_name_id = CITY_NAME.search([
-        ('name', '=', name),
-        ('country_id', '=', country_id.id),
-    ])
-    _logger.info(f'city name: {name} => {city_name_id}, {state_id}, {country_id.name}')
-    if not city_name_id:
-        city_name_id = CITY_NAME.create({
-            'name': name,
-            'state_id': state_id and state_id.id,
-            'country_id': country_id.id,
-        })
-
-    return city_name_id
+                czech_name_id = get_create_city_name(czech_name, False, czechia_id, False, current_name_id.city_id)
 
 def get_relative(family_code, relative_number):
     relative_code = family_code+relative_number
@@ -187,7 +184,7 @@ def get_relative(family_code, relative_number):
         relative_map[relative_code] = relative
     return relative
 
-def get_address(street, city, state, zipcode, country, address_type):
+def get_address(street, city, state, zipcode, country, address_type, note=False):
     if not country:
         return False
 
@@ -210,6 +207,7 @@ def get_address(street, city, state, zipcode, country, address_type):
         })
     
     if not country_id:
+        _logger.info([street, city, state, zipcode, country, address_type, note, country_id, country_name])
         raise 'Big error'
     
     state_id = False
@@ -234,7 +232,11 @@ def get_address(street, city, state, zipcode, country, address_type):
         ('zip', '=', zipcode),
         ('country_id', '=', country_id.id),
         ('address_type', '=', address_type),
-    ])
+    ] + ([
+        ('note', '=', False),
+    ] if not note else [
+        ('note', 'ilike', note),
+    ]))
 
     if not address_id:
         address_id = ADDRESS.create({
@@ -244,6 +246,7 @@ def get_address(street, city, state, zipcode, country, address_type):
             'zip': zipcode,
             'country_id': country_id.id,
             'address_type': address_type,
+            'note': note,
         })
 
     return address_id
@@ -409,25 +412,253 @@ def import_persons(sheet):
         relative_id = get_relative(family_code, relative_number)
         output |= relative_id
 
-    return output, error_log
+    return error_log
+
+
+def allocate_parent_child(sheet):
+    def get_cell(row, col):
+        return get_cell_with_sheet(sheet, row, col)
+
+    # def get_relative(family_code, family_number):
+    #     return RELATIVE.search([
+    #         ('family_id.code', '=', family_code),
+    #         ('family_number', '=', family_number),
+    #     ])
+
+    output = []
+
+    for row in range(sheet.nrows):
+        if row == 0:
+            continue
+
+        family_code = get_cell(row, 0)
+        family_number = get_cell(row, 1)
+        relative_id = get_relative(family_code, family_number)
+
+        if not relative_id:
+            _logger.info('relative not found')
+            output.append([family_code, family_number, row])
+        
+        parent_type = get_cell(row, 2)
+        parent_type = parent_type == 'M' and 'mother_id' or parent_type == 'F' and 'father_id' or None
+        if parent_type is None:
+            _logger.info('unsure parent type')
+            output.append([parent_type, row])
+            continue
+
+        parent_family_code = get_cell(row, 4)
+        parent_family_number = get_cell(row, 5)
+        parent_id = parent_family_code and get_relative(parent_family_code, parent_family_number)
+        parent_name = not parent_id and get_cell(row, 3)
+        if parent_name and not getattr(relative_id, parent_type):
+            parent_id = RELATIVE.create({
+                'first_name': parent_name,
+                'note': 'Created from Parent-Child Sheet.'
+            })
+        
+        if parent_id and hasattr(type(parent_id), '_name'):
+            setattr(relative_id, parent_type, parent_id.id)
+
+    return output
+
+def process_aliases(sheet):
+    def get_cell(row, col):
+        return get_cell_with_sheet(sheet, row, col)
+
+    output = []
+
+    for row in range(sheet.nrows):
+        if row == 0:
+            continue
+
+        family_code = get_cell(row, 0)
+        family_number = get_cell(row, 1)
+        relative_id = get_relative(family_code, family_number)
+
+        if not relative_id:
+            _logger.info('relative not found')
+            output.append([family_code, family_number, row])
+
+        alias_type = get_cell(row, 2)
+        alias_type_id = ALIAS_TYPE.search([
+            ('name', '=', alias_type),
+        ]) or ALIAS_TYPE.create({
+            'name': alias_type,
+        })
+
+        alias = get_cell(row, 3)
+        alias_note = get_cell(row, 4)
+
+        alias_id = ALIAS.search([
+            ('relative_id', '=', relative_id.id),
+            ('alias_type_ids', 'in', alias_type_id.ids),
+            ('name', '=', alias),
+            ('note', '=', alias_note),
+        ]) or ALIAS.create({
+            'relative_id': relative_id.id,
+            'alias_type_ids': alias_type_id.ids,
+            'name': alias,
+            'note': alias_note,
+        })
+
+    return output
+
+def fill_named_after(sheet):
+    def get_cell(row, col):
+        return get_cell_with_sheet(sheet, row, col)
+
+    output = []
+    pattern = re.compile(r'\b[A-Z]{2}\d{1,4}[.,;:!]*\b')
+
+    for row in range(sheet.nrows):
+        if row == 0:
+            continue
+
+        family_code = get_cell(row, 0)
+        family_number = get_cell(row, 1)
+        relative_id = get_relative(family_code, family_number)
+
+        name_orig_description = relative_id.name_orig_description or ''
+        add_name_orig_description = get_cell(row, 3)
+        relative_id.name_orig_description = (name_orig_description + ' ' + add_name_orig_description).strip()
+        
+        ancestors = pattern.findall(add_name_orig_description)
+        for ancestor in ancestors:
+            name_orig_id = get_relative(ancestor[:2], ancestor[2:])
+            if name_orig_id:
+                relative_id.name_orig_ids |= name_orig_id
+            else:
+                if not relative_id.note:
+                    relative_id.note = ''
+                relative_id.note += f'Mismatched named after family code/ID: {ancestor}'
+                output.append(ancestor)
+
+    return output
+
+def add_emails(sheet):
+    def get_cell(row, col):
+        return get_cell_with_sheet(sheet, row, col)
+
+    output = []
+
+    for row in range(sheet.nrows):
+        if row == 0:
+            continue
+
+        family_code = get_cell(row, 0)
+        family_number = get_cell(row, 1)
+        relative_id = get_relative(family_code, family_number)
+
+        email_name = get_cell(row, 2)
+        email_domain = get_cell(row, 3)
+        if email_domain:
+            relative_id.email = f'{email_name}@{email_domain}'.lower()
+
+    return output
+
+def process_deaths(sheet):
+    def get_cell(row, col):
+        return get_cell_with_sheet(sheet, row, col)
+
+    output = []
+
+    for row in range(sheet.nrows):
+        if row == 0:
+            continue
+
+        family_code = get_cell(row, 0)
+        family_number = get_cell(row, 1)
+        relative_id = get_relative(family_code, family_number)
+
+        city_of_death = get_cell(row, 2)
+        state_of_death = get_cell(row, 3)
+        country_of_death = get_cell(row, 4)
+
+        date_of_death = get_cell(row, 5)
+        jewish_date_of_death = get_cell(row, 6)
+        
+        city_of_burial = get_cell(row, 7)
+        state_of_burial = get_cell(row, 8)
+        country_of_burial = get_cell(row, 9)
+        note0 = get_cell(row, 10)
+        note1 = get_cell(row, 11)
+        note = (note0 or '') + (note1 or '')
+        
+        date_of_death, approximate_dod = get_datetime(date_of_death)
+        try:
+            died_at_night = date_of_death and not approximate_dod and compare_hebrew_date(date_of_death, jewish_date_of_death)
+        except Exception as error:
+            output.append(error)
+            died_at_night = False
+
+        relative_id.write({
+            'date_of_death': date_of_death,
+            'date_of_death_approximate': approximate_dod,
+            'death_after_sunset': died_at_night,
+        })
+
+        place_of_death = country_of_death and get_address(False, city_of_death, state_of_death, False, country_of_death, 'death') or ADDRESS
+        _logger.info(row)
+        place_of_burial = country_of_burial and get_address(False, city_of_burial, state_of_burial, False, country_of_burial, 'burial_plot', note=note) or ADDRESS
+        relative_id.address_ids |= place_of_death | place_of_burial
+
+    return output
+
+
+def append_notes(sheet):
+    def get_cell(row, col):
+        return get_cell_with_sheet(sheet, row, col)
+
+    output = []
+
+    for row in range(sheet.nrows):
+        if row == 0:
+            continue
+
+        family_code = get_cell(row, 0)
+        family_number = get_cell(row, 1)
+        relative_id = get_relative(family_code, family_number)
+
+        if not relative_id.note:
+            relative_id.note = ''
+        relative_id.note += get_cell(row, 3)
+
+    return output
 
 
 attachment = self.env['ir.attachment'].browse(20)  # change id before running
 wb = xlrd.open_workbook(file_contents=binascii.a2b_base64(attachment.datas))
+errors = []
+
 state_code_sheet = wb.sheet_by_index(9)
 populate_state_name_map(state_code_sheet)
+
+person_sheet = wb.sheet_by_index(0)
+errors += import_persons(person_sheet)
 
 city_sheet = wb.sheet_by_index(8)
 populate_city_names(city_sheet)
 
-person_sheet = wb.sheet_by_index(0)
-
-result = import_persons(person_sheet)
-
 parent_child_sheet = wb.sheet_by_index(1)
+errors += allocate_parent_child(parent_child_sheet)
+
 alias_sheet = wb.sheet_by_index(3)
+errors += process_aliases(alias_sheet)
+
 named_after_sheet = wb.sheet_by_index(4)
-spouse_sheet = wb.sheet_by_index(5)
+errors += fill_named_after(named_after_sheet)
+
+# TODO:
+# spouse_sheet = wb.sheet_by_index(5)
+# END TODO
+
 email_sheet = wb.sheet_by_index(6)
+errors += add_emails(email_sheet)
+
 death_sheet = wb.sheet_by_index(7)
+errors += process_deaths(death_sheet)
+
 notes_sheet = wb.sheet_by_index(10)
+errors += append_notes(notes_sheet)
+
+result = errors
