@@ -45,6 +45,12 @@
             </field>
         </record>
 
+		<record id="action_genealogy_relative_city_name" model="ir.actions.act_window">
+			<field name="name">City Names</field>
+			<field name="res_model">relative.city.name</field>
+			<field name="view_mode">tree,form,pivot</field>
+		</record>
+
 		<record id="action_genealogy_relative_city" model="ir.actions.act_window">
 			<field name="name">Cities</field>
 			<field name="res_model">relative.city</field>

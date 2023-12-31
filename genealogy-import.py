@@ -68,6 +68,7 @@ def populate_state_name_map(sheet):
 def get_state(name, country):
     if not name:
         return False
+    _logger.info(f'state map: {name}: {state_map.get(name)}')
     state_name = state_map.get(name) or name
     state_code = name
     state_id = STATE.search([
@@ -76,13 +77,14 @@ def get_state(name, country):
             ('code', '=', state_code),
         ('country_id', '=', country.id)
     ])
-    # _logger.info(f'{state_name}, {state_code}, {country.name}')
+    _logger.info(f'found {state_id}')
     if not state_id:
         state_id = STATE.create({
             'name': state_name,
             'code': state_code,
             'country_id': country.id,
         })
+    return state_id
 
 def populate_city_names(sheet):
     def get_cell(row, col):
@@ -164,9 +166,9 @@ def get_city(name, state_id, country_id):
         ('name', '=', name),
         ('country_id', '=', country_id.id),
     ])
-
+    _logger.info(f'city name: {name} => {city_name_id}, {state_id}, {country_id.name}')
     if not city_name_id:
-        CITY_NAME.create({
+        city_name_id = CITY_NAME.create({
             'name': name,
             'state_id': state_id and state_id.id,
             'country_id': country_id.id,
@@ -211,6 +213,7 @@ def get_address(street, city, state, zipcode, country, address_type):
         raise 'Big error'
     
     state_id = False
+    _logger.info(state)
     if state:
         state_id = get_state(state, country_id)
     
@@ -221,7 +224,7 @@ def get_address(street, city, state, zipcode, country, address_type):
         if city_name_id and not city_name_id.state_id and state_id:
             city_name_id.state_id = state_id.id
 
-    if not type(city_name_id) == bool and city_name_id.ids == []:
+    if not city_name_id:
         city_name_id = False
     # _logger.info(f'{city_name_id}, {city_name_id.ids}, {city_name_id.ids == []}')
     address_id = ADDRESS.search([
@@ -333,7 +336,7 @@ def import_persons(sheet):
         country_of_birth = get_cell(row, 9)
         date_of_birth = get_cell(row, 10)
         jewish_date_of_birth = get_cell(row, 11)
-        # married = get_cell(row, 12)
+        married = get_cell(row, 12)
         street_of_residence = get_cell(row, 13)
         city_of_residence = get_cell(row, 14)
         state_of_residence = get_cell(row, 15)
@@ -344,7 +347,7 @@ def import_persons(sheet):
         phone_last7 = get_cell(row, 20)
         blood_related = get_cell(row, 21)
         sex = get_cell(row, 22)
-        # alive = get_cell(row, 23)
+        alive = get_cell(row, 23)
         head_of_household = get_cell(row, 24)
         has_picture = get_cell(row, 25)
         living_with = get_cell(row, 26)
@@ -390,18 +393,17 @@ def import_persons(sheet):
             'birth_after_sunset': born_at_night,
             'mobile_phone': phone_number,
             'sex': get_sex(sex),
+            'note': f'Lives with: {living_with}\nMarried: {married}\nLiving: {alive}\nBlood related: {blood_related}\nHoH: {head_of_household}\nNeed to import picture: {has_picture}',
         }
 
-        if not relative_id:
-            relative_id = relative_id.create(vals)
-        else:
-            relative_id.write(vals)
+        relative_id.write(vals)
 
         alias_jewish_name = get_create_alias(relative_id, jewish_name, alias_type_jewish)
         alias_nickname = get_create_alias(relative_id, nickname, alias_type_nickname)
         address_of_birth = get_address(False, city_of_birth, state_of_birth, False, country_of_birth, 'birthplace')
-
         address_of_residence = get_address(street_of_residence, city_of_residence, state_of_residence, zipcode_of_residence, country_of_residence, 'home')
+        relative_id.address_ids |= (address_of_birth or ADDRESS) + (address_of_residence or ADDRESS)
+        relative_id.current_address_id = address_of_residence and address_of_residence.id
         
         # Use this to populate the map
         relative_id = get_relative(family_code, relative_number)
@@ -410,7 +412,7 @@ def import_persons(sheet):
     return output, error_log
 
 
-attachment = self.env['ir.attachment'].browse(215)  # change id before running
+attachment = self.env['ir.attachment'].browse(20)  # change id before running
 wb = xlrd.open_workbook(file_contents=binascii.a2b_base64(attachment.datas))
 state_code_sheet = wb.sheet_by_index(9)
 populate_state_name_map(state_code_sheet)

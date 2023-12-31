@@ -65,10 +65,18 @@
 		/>
 
 		<menuitem
+			name="City Names"
+			id="menu_cit_names"
+			parent="menu_configuration"
+			sequence="4"
+			action="action_genealogy_relative_city_name"
+		/>
+
+		<menuitem
 			name="Cities"
 			id="menu_cities"
 			parent="menu_configuration"
-			sequence="4"
+			sequence="5"
 			action="action_genealogy_relative_city"
 		/>
 
@@ -76,7 +84,7 @@
 			name="States"
 			id="menu_states"
 			parent="menu_configuration"
-			sequence="5"
+			sequence="6"
 			action="base.action_country_state"
 		/>
 
@@ -84,7 +92,7 @@
 			name="Countries"
 			id="menu_countries"
 			parent="menu_configuration"
-			sequence="6"
+			sequence="7"
 			action="base.action_country"
 		/>
 
@@ -92,7 +100,7 @@
 			name="Country Groups"
 			id="menu_country_groups"
 			parent="menu_configuration"
-			sequence="7"
+			sequence="8"
 			action="base.action_country_group"
 		/>
 	</data>
