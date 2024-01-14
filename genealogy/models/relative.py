@@ -202,7 +202,7 @@ class Relative(models.Model):
                 '|',
                 ('male_id', '=', relative.id),
                 ('female_id', '=', relative.id),
-            ], order='start_date').ids
+            ], order='date_of_marriage').ids
 
     def _set_relationship_ids(self):
         for relative in self:
@@ -210,7 +210,7 @@ class Relative(models.Model):
                 '|',
                     ('male_id', '=', relative.id),
                     ('female_id', '=', relative.id),
-            ], order='start_date')
+            ], order='date_of_marriage')
 
             (old_relationship_ids - relative.relationship_ids).unlink()
 
@@ -220,8 +220,8 @@ class Relative(models.Model):
                 '|',
                     ('male_id', '=', relative.id),
                     ('female_id', '=', relative.id),
-                ('end_date', '=', False),
-                ('status', 'not in', [
+                ('divorce_date', '=', False),
+                ('status_id.ended', 'not in', [
                     'divorced',
                     'deceased',
                     'children',

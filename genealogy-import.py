@@ -23,6 +23,7 @@ ADDRESS = self.env['relative.address']
 relative_map = {}
 country_map = {
     'USA': 'United States',
+    'Test Country OM': 'United States',
     'UK': 'United Kingdom',
     'Uk': 'United Kingdom',
     'uK': 'United Kingdom',
@@ -30,6 +31,7 @@ country_map = {
     'Palestine': 'State of Palestine',
     'Russia': 'Russian Federation',
     'Austria-Hungary': ('Austria-Hungary', 'AHHH'),
+    'Czechosolvakia': ('Czechoslovakia', 'CSHH'),
     'Czechoslovakia': ('Czechoslovakia', 'CSHH'),
     'BSSR': ('Byelorussian Soviet Socialist Republic', 'BYAA'),
     'USSR': ('Union of Soviet Socialist Republics', 'SUHH'),
@@ -194,10 +196,11 @@ def get_address(street, city, state, zipcode, country, address_type, note=False)
         country_code = country_name[1]
         country_name = country_name[0]
     
+
     country_id = COUNTRY.search([
         '|',
             ('name', '=', country_name),
-            ('code', '=', country_code),
+            ('code', '=', country_code or country_name),
     ])
 
     if not country_id and country_name and country_code:
@@ -207,7 +210,7 @@ def get_address(street, city, state, zipcode, country, address_type, note=False)
         })
     
     if not country_id:
-        _logger.info([street, city, state, zipcode, country, address_type, note, country_id, country_name])
+        _logger.info([street, city, state, zipcode, country, address_type, note, country_id, country_name, country_code])
         raise 'Big error'
     
     state_id = False
@@ -625,6 +628,84 @@ def append_notes(sheet):
 
     return output
 
+def create_marriages(sheet):
+    def get_cell(row, col):
+        return get_cell_with_sheet(sheet, row, col)
+
+    def _get_marriage_status(status):
+        status_id = self.env['relative.relationship.status'].search([('name', '=', status)])
+
+        if not status_id:
+            status_id = self.env['relative.relationship.status'].create({
+                'name': status,
+            })
+        
+        return status_id
+
+
+    output = []
+
+    for row in range(sheet.nrows):
+        if row == 0:
+            continue
+
+        _logger.info(row)
+
+        relative0_id = get_relative(get_cell(row, 0), get_cell(row, 1))
+        relative1_id = get_relative(get_cell(row, 9), get_cell(row, 10))
+
+        if relative0_id.sex == 'male':
+            male_id = relative0_id
+            female_id = relative1_id
+        elif relative1_id.sex == 'male':
+            male_id = relative1_id
+            female_id = relative0_id
+        else:
+            output.append(f'wat, {relative0_id} & {relative1_id}')
+            male_id = relative0_id
+            female_id = relative1_id
+
+        city_of_marriage = get_cell(row, 4)
+        state_of_marriage = get_cell(row, 5)
+        country_of_marriage = get_cell(row, 6)
+        date_of_marriage = get_cell(row, 7)
+        jewish_date_of_marriage = get_cell(row, 8)
+        status = get_cell(row, 11)
+
+        address_of_marriage = get_address(False, city_of_marriage, state_of_marriage, False, country_of_marriage, 'marriage')
+        status_id = _get_marriage_status(status)
+
+
+        date_of_marriage, approximate_dom = get_datetime(date_of_marriage)
+        try:
+            married_at_night = date_of_marriage and not approximate_dom and compare_hebrew_date(date_of_marriage, jewish_date_of_marriage)
+        except Exception as error:
+            output.append(error)
+            married_at_night = False
+
+        marriage_id = self.env['relative.relationship'].search([
+            ('male_id', '=', male_id.id),
+            ('female_id', '=', female_id.id),
+            ('date_of_marriage', '=', date_of_marriage and date_of_marriage.strftime('%Y-%m-%d %H:%M:%S')),
+            ('date_of_marriage_approximate', '=', approximate_dom),
+            ('marriage_after_sunset', '=', married_at_night),
+            ('status_id', '=', status_id.id),
+        ])
+
+        if not marriage_id:
+            marriage_id = self.env['relative.relationship'].create({
+                'male_id': male_id.id,
+                'female_id': female_id.id,
+                'date_of_marriage': date_of_marriage and date_of_marriage.strftime('%Y-%m-%d %H:%M:%S'),
+                'date_of_marriage_approximate': approximate_dom,
+                'marriage_after_sunset': married_at_night,
+                'status_id': status_id.id,
+            })
+
+
+    return output
+
+
 
 attachment = self.env['ir.attachment'].browse(20)  # change id before running
 wb = xlrd.open_workbook(file_contents=binascii.a2b_base64(attachment.datas))
@@ -648,9 +729,8 @@ errors += process_aliases(alias_sheet)
 named_after_sheet = wb.sheet_by_index(4)
 errors += fill_named_after(named_after_sheet)
 
-# TODO:
-# spouse_sheet = wb.sheet_by_index(5)
-# END TODO
+spouse_sheet = wb.sheet_by_index(5)
+errors += create_marriages(spouse_sheet)
 
 email_sheet = wb.sheet_by_index(6)
 errors += add_emails(email_sheet)

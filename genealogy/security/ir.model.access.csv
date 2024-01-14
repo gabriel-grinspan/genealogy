@@ -7,4 +7,5 @@ access_relative_city_name_manager,relative.city.name.manager,model_relative_city
 access_relative_family_manager,relative.family.manager,model_relative_family,base.group_partner_manager,1,1,1,1
 access_relative_manager,relative.manager,model_relative,base.group_partner_manager,1,1,1,1
 access_relative_relationship_manager,relative.relationship.manager,model_relative_relationship,base.group_partner_manager,1,1,1,1
+access_relative_relationship_status_manager,relative.relationship.status.manager,model_relative_relationship_status,base.group_partner_manager,1,1,1,1
 access_relative_relationship_wizard_manager,relative.relationship.wizard.manager,model_relative_relationship_wizard,base.group_partner_manager,1,1,1,1

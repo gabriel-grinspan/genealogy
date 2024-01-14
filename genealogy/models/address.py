@@ -20,6 +20,7 @@ class RelativeAddress(models.Model):
     address_type = fields.Selection([
         ('home', 'Home Address'),
         ('birthplace', 'Birthplace'),
+        ('marriage', 'Place of Marriage'),
         ('death', 'Place of Death'),
         ('burial_plot', 'Burial Plot'),
     ], default='home', string='Address Type')

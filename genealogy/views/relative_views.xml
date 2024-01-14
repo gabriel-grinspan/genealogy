@@ -171,26 +171,62 @@
 									<field name="relationship_ids" no_label="1" mode="tree" invisible="spouse_type != 'male'" widget="list_renderer_no_link">
 										<tree editable="top" create='0'>
 											<field name="female_id" readonly="1" />
-											<field name="status" />
-											<field name="start_date" />
-											<field name="end_date" />
+											<field name="status_id" />
+											<field name="date_of_marriage" />
+											<field
+												name="marriage_after_sunset"
+												widget="boolean_emoji"
+												options="{'false_emoji': '☀️', 'true_emoji': '🌙'}"
+											/>
+											<field
+												name="date_of_marriage_approximate"
+												widget="boolean_emoji"
+												options="{'false_emoji': '❔', 'true_emoji': '❓'}"
+											/>
+											<field name="lunisolar_date_of_marriage" />
+											<field name="marriage_location" />
+											<field name="divorce_date" />
 										</tree>
 									</field>
 									<field name="relationship_ids" mode="tree" invisible="spouse_type != 'female'" widget="list_renderer_no_link">
 										<tree editable="top" create="0">
 											<field name="male_id" readonly="1" />
-											<field name="status" />
-											<field name="start_date" />
-											<field name="end_date" />
+											<field name="status_id" />
+											<field name="date_of_marriage" />
+											<field
+												name="marriage_after_sunset"
+												widget="boolean_emoji"
+												options="{'false_emoji': '☀️', 'true_emoji': '🌙'}"
+											/>
+											<field
+												name="date_of_marriage_approximate"
+												widget="boolean_emoji"
+												options="{'false_emoji': '❔', 'true_emoji': '❓'}"
+											/>
+											<field name="lunisolar_date_of_marriage" />
+											<field name="marriage_location" />
+											<field name="divorce_date" />
 										</tree>
 									</field>
 									<field name="relationship_ids" mode="tree" invisible="spouse_type not in ['mixed', False] or not relationship_ids" widget="list_renderer_no_link">
 										<tree editable="top" create="0">
 											<field name="male_id" readonly="1" />
 											<field name="female_id" readonly="1" />
-											<field name="status" />
-											<field name="start_date" />
-											<field name="end_date" />
+											<field name="status_id" />
+											<field name="date_of_marriage" />
+											<field
+												name="marriage_after_sunset"
+												widget="boolean_emoji"
+												options="{'false_emoji': '☀️', 'true_emoji': '🌙'}"
+											/>
+											<field
+												name="date_of_marriage_approximate"
+												widget="boolean_emoji"
+												options="{'false_emoji': '❔', 'true_emoji': '❓'}"
+											/>
+											<field name="lunisolar_date_of_marriage" />
+											<field name="marriage_location" />
+											<field name="divorce_date" />
 										</tree>
 									</field>
 									<div class="alert alert-info" role="alert" invisible="relationship_ids" colspan="2">No relationship history</div>

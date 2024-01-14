@@ -12,14 +12,8 @@
                             <field name="relative_id" class="col-6" />
                         </div>
                         <div class="row">
-                            <label for="status" class="col-5 col-md-4 col-lg-3" />
-                            <field name="status" class="col-6" />
-                        </div>
-                        <div class="row">
-                            <label for="start_date" class="col-5 col-lg-2" />
-                            <field name="start_date" class="col-6 col-lg-3" />
-                            <label for="end_date" class="col-5 col-lg-2" />
-                            <field name="end_date" class="col-6 col-lg-3" />
+                            <label for="status_id" class="col-5 col-md-4 col-lg-3" />
+                            <field name="status_id" class="col-6" />
                         </div>
                     </div>
                     <footer>

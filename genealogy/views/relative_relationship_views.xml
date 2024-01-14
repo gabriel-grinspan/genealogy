@@ -7,9 +7,21 @@
                 <tree string="Partnerships" editable="bottom">
                     <field name="male_id" />
                     <field name="female_id" />
-                    <field name="status" />
-                    <field name="start_date" />
-                    <field name="end_date" />
+                    <field name="status_id" />
+                    <field name="date_of_marriage" />
+                    <field
+                        name="marriage_after_sunset"
+                        widget="boolean_emoji"
+                        options="{'false_emoji': '☀️', 'true_emoji': '🌙'}"
+                    />
+                    <field
+                        name="date_of_marriage_approximate"
+                        widget="boolean_emoji"
+                        options="{'false_emoji': '❔', 'true_emoji': '❓'}"
+                    />
+                    <field name="lunisolar_date_of_marriage" />
+                    <field name="marriage_location" />
+                    <field name="divorce_date" />
                 </tree>
             </field>
         </record>

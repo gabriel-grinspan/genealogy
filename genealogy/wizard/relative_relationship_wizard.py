@@ -1,5 +1,4 @@
 from odoo import models, fields, api, _
-from odoo.addons.genealogy.models.relationship import RELATIONSHIP_STATUSES
 from odoo.exceptions import UserError
 
 
@@ -8,9 +7,7 @@ class RelationshipWizard(models.TransientModel):
     _description = 'Relationship Creation Wizard'
 
     relative_id = fields.Many2one('relative', string='Partner', required=True)
-    status = fields.Selection(RELATIONSHIP_STATUSES, string='Relationship Status', required=True)
-    start_date = fields.Date(string='Start Date')
-    end_date = fields.Date(string='End Date')
+    status_id = fields.Many2one('relative.relationship.status', string='Relationship Status', required=True)
 
     def create_relationship(self):
         current_relative_id = self._context.get('active_id')
@@ -33,7 +30,5 @@ class RelationshipWizard(models.TransientModel):
         self.env['relative.relationship'].create({
             'male_id': male,
             'female_id': female,
-            'status': self.status,
-            'start_date': self.start_date,
-            'end_date': self.end_date,
+            'status_id': self.status_id.id,
         })
