@@ -1,0 +1,15 @@
+<odoo>
+	<data>
+		<record id="action_genealogy_relative_tribe" model="ir.actions.act_window">
+			<field name="name">Tribes</field>
+			<field name="res_model">relative.tribe</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<record id="action_genealogy_relative_family" model="ir.actions.act_window">
+			<field name="name">Families</field>
+			<field name="res_model">relative.family</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+	</data>
+</odoo>

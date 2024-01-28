@@ -118,6 +118,7 @@
 							</page>
 							<page name="relationships" string="Family">
 								<group colspan="2">
+									<field name="tribe_id" />
 									<field name="family_id" />
 									<field name="family_number" />
 								</group>
@@ -271,7 +272,9 @@
 			<field name="model">relative</field>
 			<field name="arch" type="xml">
 				<tree>
+					<field name="family_code"/>
 					<field name="name"/>
+					<field name="date_of_birth"/>
 					<field name="phone"/>
 					<field name="email"/>
 				</tree>
@@ -344,5 +347,31 @@
 			<field name="res_model">relative</field>
 			<field name="view_mode">tree,form,kanban,pivot,calendar</field>
 		</record>
+
+		<record id="view_relative_search" model="ir.ui.view">
+			<field name="name">relative.search</field>
+			<field name="model">relative</field>
+			<field name="arch" type="xml">
+				<search string="Relative">
+					<field
+						name="name"
+						filter_domain="['|', '|', '|', '|', '|',
+							('name', 'ilike', self),
+							('family_code', 'ilike', self),
+							('email', 'ilike', self),
+							('mobile_phone', 'ilike', self),
+							('home_phone', 'ilike', self),
+							('date_of_birth', 'ilike', self),
+						]"
+						string="Relative"
+					/>
+					<group string="Group By">
+						<filter string="Current Address" name="current_address" domain="[]" context="{'group_by': 'current_address_id'}"/>
+						<filter string="Past Addresses" name="addresses" domain="[]" context="{'group_by': 'address_ids'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
 	</data>
 </odoo>

@@ -7,7 +7,7 @@ class RelativeAlias(models.Model):
     name = fields.Char('Alias', required=True)
     alias_type_ids = fields.Many2many('relative.alias.type', string='Type', required=True)
     note = fields.Text('Notes')
-    relative_id = fields.Many2one('relative', string='Partner', readonly=True)
+    relative_id = fields.Many2one('relative', string='Relative', readonly=True)
     sequence = fields.Integer('Sequence')
 
 

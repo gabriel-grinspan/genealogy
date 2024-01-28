@@ -1,35 +1,79 @@
 <odoo>
 	<data>
-        <record id="view_relative_relationship_tree" model="ir.ui.view">
-            <field name="name">relative.relationship.view.tree</field>
-            <field name="model">relative.relationship</field>
-            <field name="arch" type="xml">
-                <tree string="Partnerships" editable="bottom">
-                    <field name="male_id" />
-                    <field name="female_id" />
-                    <field name="status_id" />
-                    <field name="date_of_marriage" />
-                    <field
-                        name="marriage_after_sunset"
-                        widget="boolean_emoji"
-                        options="{'false_emoji': '☀️', 'true_emoji': '🌙'}"
-                    />
-                    <field
-                        name="date_of_marriage_approximate"
-                        widget="boolean_emoji"
-                        options="{'false_emoji': '❔', 'true_emoji': '❓'}"
-                    />
-                    <field name="lunisolar_date_of_marriage" />
-                    <field name="marriage_location" />
-                    <field name="divorce_date" />
-                </tree>
-            </field>
-        </record>
+		<record id="view_relative_relationship_tree" model="ir.ui.view">
+			<field name="name">relative.relationship.view.tree</field>
+			<field name="model">relative.relationship</field>
+			<field name="arch" type="xml">
+				<tree string="Partnerships" editable="bottom">
+					<field name="male_id" />
+					<field name="female_id" />
+					<field name="status_id" />
+					<field name="date_of_marriage" />
+					<field
+						name="marriage_after_sunset"
+						widget="boolean_emoji"
+						options="{'false_emoji': '☀️', 'true_emoji': '🌙'}"
+					/>
+					<field
+						name="date_of_marriage_approximate"
+						widget="boolean_emoji"
+						options="{'false_emoji': '❔', 'true_emoji': '❓'}"
+					/>
+					<field name="lunisolar_date_of_marriage" />
+					<field name="marriage_location" />
+					<field name="divorce_date" />
+				</tree>
+			</field>
+		</record>
 
 		<record id="action_genealogy_relationship" model="ir.actions.act_window">
 			<field name="name">Relationships</field>
 			<field name="res_model">relative.relationship</field>
 			<field name="view_mode">tree,form,pivot</field>
+		</record>
+
+		<record id="action_genealogy_relative_relationship_status" model="ir.actions.act_window">
+			<field name="name">Relationship Status Types</field>
+			<field name="res_model">relative.relationship.status</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<record id="view_relative_relationship_search" model="ir.ui.view">
+			<field name="name">relative.relationship.search</field>
+			<field name="model">relative.relationship</field>
+			<field name="arch" type="xml">
+				<search string="Relationship">
+					<field
+						name="male_id"
+						filter_domain="['|', '|', '|', '|', '|',
+							('male_id.name', 'ilike', self),
+							('male_id.family_code', 'ilike', self),
+							('male_id.email', 'ilike', self),
+							('male_id.mobile_phone', 'ilike', self),
+							('male_id.home_phone', 'ilike', self),
+							('male_id.date_of_birth', 'ilike', self),
+						]"
+						string="Husband"
+					/>
+					<field
+						name="female_id"
+						filter_domain="['|', '|', '|', '|', '|',
+							('female_id.name', 'ilike', self),
+							('female_id.family_code', 'ilike', self),
+							('female_id.email', 'ilike', self),
+							('female_id.mobile_phone', 'ilike', self),
+							('female_id.home_phone', 'ilike', self),
+							('female_id.date_of_birth', 'ilike', self),
+						]"
+						string="Wife"
+					/>
+					<group string="Group By">
+						<filter string="Husband" name="male_id" domain="[]" context="{'group_by': 'male_id'}"/>
+						<filter string="Wife" name="female_id" domain="[]" context="{'group_by': 'female_id'}"/>
+						<filter string="Wedding Date" name="date_of_marriage" domain="[]" context="{'group_by': 'date_of_marriage'}"/>
+					</group>
+				</search>
+			</field>
 		</record>
 	</data>
 </odoo>

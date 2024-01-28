@@ -11,6 +11,8 @@ from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 RELATIVE = self.env['relative']
+TITLE = self.env['res.partner.title']
+TRIBE = self.env['relative.tribe']
 FAMILY = self.env['relative.family']
 ALIAS_TYPE = self.env['relative.alias.type']
 ALIAS = self.env['relative.alias']
@@ -302,6 +304,8 @@ def import_persons(sheet):
         })
 
     def get_create_alias(relative, name, alias_type):
+        if not name:
+            return ALIAS
         if relative:
             domain = [
                 ('name', '=', name),
@@ -316,6 +320,16 @@ def import_persons(sheet):
             'alias_type_ids': alias_type.ids,
             'relative_id': relative.id,
         })
+    
+    def get_create_record(model, name):
+        if not name:
+            return model
+        record_id = model.search([('name', '=', name)])
+        if not record_id:
+            record_id = model.create({
+                'name': name,
+            })
+        return record_id
 
     output = RELATIVE
     error_log = []
@@ -357,9 +371,9 @@ def import_persons(sheet):
         head_of_household = get_cell(row, 24)
         has_picture = get_cell(row, 25)
         living_with = get_cell(row, 26)
+        title_code = get_cell(row, 27)
+        shcode = get_cell(row, 28)
         # I don't have this data \/
-        # title_code = get_cell(row, 27)
-        # shcode = get_cell(row, 28)
         # status = get_cell(row, 29)
 
         # Start importing
@@ -388,8 +402,11 @@ def import_persons(sheet):
         try:
             phone_number = phone and phonenumbers.format_number(phonenumbers.parse(phone), phonenumbers.PhoneNumberFormat.INTERNATIONAL)
         except Exception as error:
-            error_log.append(f'{phone}, {error}')
-            phone_number = False
+            if family.code == 'GR' and relative_number == 127:
+                phone_number = '+42 5793937'
+            else:
+                error_log.append(f'{phone}, {error}')
+                phone_number = False
 
         vals = {
             'first_name': first_name,
@@ -410,6 +427,9 @@ def import_persons(sheet):
         address_of_residence = get_address(street_of_residence, city_of_residence, state_of_residence, zipcode_of_residence, country_of_residence, 'home')
         relative_id.address_ids |= (address_of_birth or ADDRESS) + (address_of_residence or ADDRESS)
         relative_id.current_address_id = address_of_residence and address_of_residence.id
+
+        relative_id.title_id = get_create_record(TITLE, title_code)
+        relative_id.tribe_id = get_create_record(TRIBE, shcode)
         
         # Use this to populate the map
         relative_id = get_relative(family_code, relative_number)
@@ -491,18 +511,25 @@ def process_aliases(sheet):
 
         alias = get_cell(row, 3)
         alias_note = get_cell(row, 4)
+        if not alias:
+            continue
 
         alias_id = ALIAS.search([
             ('relative_id', '=', relative_id.id),
-            ('alias_type_ids', 'in', alias_type_id.ids),
+            # ('alias_type_ids', 'in', alias_type_id.ids),
             ('name', '=', alias),
             ('note', '=', alias_note),
-        ]) or ALIAS.create({
-            'relative_id': relative_id.id,
-            'alias_type_ids': alias_type_id.ids,
-            'name': alias,
-            'note': alias_note,
-        })
+        ])
+
+        if alias_id:
+            alias_id.alias_type_ids |= alias_type_id
+        else:
+            ALIAS.create({
+                'relative_id': relative_id.id,
+                'alias_type_ids': alias_type_id.ids,
+                'name': alias,
+                'note': alias_note,
+            })
 
     return output
 

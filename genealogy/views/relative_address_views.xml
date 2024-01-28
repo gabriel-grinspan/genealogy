@@ -79,11 +79,62 @@
 				</kanban>
 			</field>
 		</record>
+	
+		<record model="ir.ui.view" id="genealogy_relative_address_tree">
+			<field name="name">relative.address.view.tree</field>
+			<field name="model">relative.address</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="street"/>
+					<field name="city_name_id"/>
+					<field name="state_id"/>
+					<field name="zip"/>
+					<field name="country_id"/>
+				</tree>
+			</field>
+		</record>
 
 		<record id="action_genealogy_address" model="ir.actions.act_window">
 			<field name="name">Addresses</field>
 			<field name="res_model">relative.address</field>
 			<field name="view_mode">tree,form,kanban,pivot</field>
+		</record>
+
+		<record id="view_relative_address_search" model="ir.ui.view">
+			<field name="name">relative.address.search</field>
+			<field name="model">relative.address</field>
+			<field name="arch" type="xml">
+				<search string="Address">
+					<field
+						name="name"
+						filter_domain="['|', '|', '|', '|', '|',
+							('street', 'ilike', self),
+							('street2', 'ilike', self),
+							('city_name_id.name', 'ilike', self),
+							('state_id.name', 'ilike', self),
+							('zip', 'ilike', self),
+							('country_id.name', 'ilike', self),
+						]"
+						string="Address"
+					/>
+					<field
+						name="city_name_id"
+						string="City"
+					/>
+					<field
+						name="state_id"
+						string="State"
+					/>
+					<field
+						name="country_id"
+						string="Country"
+					/>
+					<group string="Group By">
+						<filter string="State" name="state" domain="[]" context="{'group_by': 'state_id'}"/>
+						<filter string="Country" name="country" domain="[]" context="{'group_by': 'country_id'}"/>
+					</group>
+				</search>
+			</field>
 		</record>
 	</data>
 </odoo>

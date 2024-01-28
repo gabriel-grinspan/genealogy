@@ -3,8 +3,8 @@ from odoo import models, fields, api
 class RelativeAddress(models.Model):
     _name = 'relative.address'
     _description = 'Address'
-    _rec_name = 'street'
 
+    name = fields.Char(compute='_compute_name', store=True)
     street = fields.Char()
     street2 = fields.Char()
     zip = fields.Char(change_default=True)
@@ -31,6 +31,11 @@ class RelativeAddress(models.Model):
 
     head_of_household_id = fields.Many2one('relative', string='Head of Household', domain="[('id', 'in', current_relative_ids)]")
     head_of_household_id_image_128 = fields.Image(related='head_of_household_id.image_128')
+
+    @api.depends('street', 'city_name_id', 'state_id', 'country_id')
+    def _compute_name(self):
+        for address in self:
+            address.name = address.street or address.city_name_id.name or address.state_id.name or address.country_id.name or 'Unknown'
 
     def _compute_relative_ids(self):
         for address in self:

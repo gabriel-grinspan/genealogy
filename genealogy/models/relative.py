@@ -53,6 +53,10 @@ class Relative(models.Model):
 
     family_id = fields.Many2one('relative.family', string='Family')
     family_number = fields.Integer('Family ID', readonly=True)
+    family_code = fields.Char('Family Code', readonly=True, compute='_compute_family_code', store=True)
+    
+    tribe_id = fields.Many2one('relative.tribe', string='Tribe')
+
     father_id = fields.Many2one('relative', string='Father')
     mother_id = fields.Many2one('relative', string='Mother')
 
@@ -85,6 +89,11 @@ class Relative(models.Model):
     def _compute_name(self):
         for relative in self:
             relative.name = f'{relative.title_id.shortcut or ""} {relative.first_name or ""} {relative.last_name or ""}'.strip()
+
+    @api.depends('family_id', 'family_number')
+    def _compute_family_code(self):
+        for relative in self:
+            relative.family_code = f'{relative.family_id.code}{relative.family_number}'
 
     # @api.depends('name_orig_ids')
     # def _compute_name_dest_ids(self):
@@ -221,11 +230,7 @@ class Relative(models.Model):
                     ('male_id', '=', relative.id),
                     ('female_id', '=', relative.id),
                 ('divorce_date', '=', False),
-                ('status_id.ended', 'not in', [
-                    'divorced',
-                    'deceased',
-                    'children',
-                ]),
+                ('status_id.ended', '=', False),
             ])
             relative.spouse_ids = ((relationships.mapped('male_id') | relationships.mapped('female_id')) - relative).ids
 
