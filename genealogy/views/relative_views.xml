@@ -121,6 +121,7 @@
 									<field name="tribe_id" />
 									<field name="family_id" />
 									<field name="family_number" />
+									<field name="id" string="Relative Reference" options="{'format': false}" />
 								</group>
 
 								<group string="Parents" colspan="2">

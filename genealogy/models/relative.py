@@ -51,6 +51,7 @@ class Relative(models.Model):
     address_ids = fields.Many2many('relative.address', string='Addresses')
     current_address_id = fields.Many2one('relative.address', string='Current Address')
 
+    # These are for historical purposes
     family_id = fields.Many2one('relative.family', string='Family')
     family_number = fields.Integer('Family ID', readonly=True)
     family_code = fields.Char('Family Code', readonly=True, compute='_compute_family_code', store=True)
