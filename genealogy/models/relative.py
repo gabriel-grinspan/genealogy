@@ -48,8 +48,9 @@ class Relative(models.Model):
     country_id = fields.Many2one(related='current_address_id.country_id', readonly=True)
     country_code = fields.Char(related='current_address_id.country_code', readonly=True)
 
-    address_ids = fields.Many2many('relative.address', string='Addresses')
-    current_address_id = fields.Many2one('relative.address', string='Current Address')
+    relative_address_resident_ids = fields.One2many('relative.address.resident', 'relative_id', string='Addresses')
+    address_ids = fields.Many2many('relative.address', string='Addresses', compute='_compute_address_ids', store=True)
+    current_address_id = fields.Many2one('relative.address', string='Current Address', compute='_compute_address_ids', store=True)
 
     # These are for historical purposes
     family_id = fields.Many2one('relative.family', string='Family')
@@ -127,6 +128,32 @@ class Relative(models.Model):
         for relative in self:
             relative.phone = relative.mobile_phone or relative.home_phone
 
+    @api.depends('relative_address_resident_ids')
+    def _compute_address_ids(self):
+        def _get_sort_order(rar):
+            match rar.address_type:
+                case 'birthplace':
+                    address_type = 0, 
+                case 'home':
+                    address_type = 1
+                case 'death':
+                    address_type = 2
+                case 'burial':
+                    address_type = 3
+                case _:
+                    address_type = -1
+
+            return address_type, rar.sequence
+
+        for relative in self:
+            relative_address_resident_id = relative.relative_address_resident_ids.sorted(_get_sort_order, reverse=True)[:1]
+            if relative_address_resident_id:
+                relative.current_address_id = relative_address_resident_id.address_id
+            else:
+                relative.current_address_id = False
+
+            relative.address_ids = relative.relative_address_resident_ids.mapped('address_id')
+                
     @api.depends('sibling_ids', 'date_of_birth')
     def _compute_sibling_sequence(self):
         for relative in self:

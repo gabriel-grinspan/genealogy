@@ -10,3 +10,4 @@ access_relative_manager,relative.manager,model_relative,base.group_partner_manag
 access_relative_relationship_manager,relative.relationship.manager,model_relative_relationship,base.group_partner_manager,1,1,1,1
 access_relative_relationship_status_manager,relative.relationship.status.manager,model_relative_relationship_status,base.group_partner_manager,1,1,1,1
 access_relative_relationship_wizard_manager,relative.relationship.wizard.manager,model_relative_relationship_wizard,base.group_partner_manager,1,1,1,1
+access_relative_address_resident_manager,relative.address.resident.manager,model_relative_address_resident,base.group_partner_manager,1,1,1,1

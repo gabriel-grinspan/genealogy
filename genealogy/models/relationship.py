@@ -13,7 +13,7 @@ class RelativeRelationship(models.Model):
     marriage_after_sunset = fields.Boolean()
     date_of_marriage_approximate = fields.Boolean('Approximate Wedding Date')
     lunisolar_date_of_marriage = fields.Char(compute='_compute_lunisolar_date_of_marriage', string='Hebrew Wedding Date')
-    marriage_location = fields.Many2one('relative.address', string='Place of Marriage', domain="[('address_type', '=', 'marriage')]")
+    marriage_location_id = fields.Many2one('relative.address', string='Place of Marriage')
 
     divorce_date = fields.Date('Separation Date')
 

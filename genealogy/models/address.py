@@ -3,8 +3,8 @@ from odoo import models, fields, api
 class RelativeAddress(models.Model):
     _name = 'relative.address'
     _description = 'Address'
+    _rec_name = 'street'
 
-    name = fields.Char(compute='_compute_name', store=True)
     street = fields.Char()
     street2 = fields.Char()
     zip = fields.Char(change_default=True)
@@ -17,29 +17,25 @@ class RelativeAddress(models.Model):
     phone = fields.Char()
     note = fields.Html()
 
-    address_type = fields.Selection([
-        ('home', 'Home Address'),
-        ('birthplace', 'Birthplace'),
-        ('marriage', 'Place of Marriage'),
-        ('death', 'Place of Death'),
-        ('burial_plot', 'Burial Plot'),
-    ], default='home', string='Address Type')
-
+    relative_address_resident_ids = fields.One2many('relative.address.resident', 'address_id', string='Address Residents', readonly=True)
     relative_ids = fields.Many2many('relative', string='Residents', compute='_compute_relative_ids')
     past_relative_ids = fields.Many2many('relative', string='Previous Residents', compute='_compute_relative_ids')
     current_relative_ids = fields.One2many('relative', 'current_address_id', string='Current Residents', readonly=True)
+    marriage_ids = fields.One2many('relative.relationship', 'marriage_location_id', string='Marriages', readonly=True)
 
     head_of_household_id = fields.Many2one('relative', string='Head of Household', domain="[('id', 'in', current_relative_ids)]")
     head_of_household_id_image_128 = fields.Image(related='head_of_household_id.image_128')
 
-    @api.depends('street', 'city_name_id', 'state_id', 'country_id')
-    def _compute_name(self):
-        for address in self:
-            address.name = address.street or address.city_name_id.name or address.state_id.name or address.country_id.name or 'Unknown'
 
+    @api.depends('street', 'city_name_id', 'state_id', 'country_id')
+    def _compute_display_name(self):
+        for address in self:
+            address.display_name = address.street or address.city_name_id.name or address.state_id.name or address.country_id.name or 'Unknown'
+
+    @api.depends('current_relative_ids', 'relative_address_resident_ids')
     def _compute_relative_ids(self):
         for address in self:
-            relative_ids = self.env['relative'].search([('address_ids', 'in', address.id)])
+            relative_ids = address.relative_address_resident_ids.mapped('relative_id')
             address.relative_ids = relative_ids.ids
             address.past_relative_ids = (relative_ids - address.current_relative_ids).ids
 
@@ -78,3 +74,21 @@ class RelativeAddress(models.Model):
             self.city_name_id.country_id = self.country_id
         elif self.city_name_id and self.city_name_id.country_id.id != self.country_id.id:
             self.city_name_id = False
+
+
+class RelativeAddressResident(models.Model):
+    _name = 'relative.address.resident'
+    _description = 'Address Resident'
+    _order = 'sequence, id'
+
+    sequence = fields.Integer('Sequence')
+    relative_id = fields.Many2one('relative', string='Relative', required=True)
+    address_id = fields.Many2one('relative.address', string='Address', required=True)
+    address_type = fields.Selection([
+        ('home', 'Home Address'),
+        ('birthplace', 'Birthplace'),
+        ('death', 'Place of Death'),
+        ('burial', 'Burial Plot'),
+    ], default='home', string='Address Type')
+
+    _sql_constraints = [('relative_address_type_uniq', 'unique(relative_id, address_id, address_type)', 'A relative-address relationship must be unique.')]

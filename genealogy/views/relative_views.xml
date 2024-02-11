@@ -186,7 +186,7 @@
 												options="{'false_emoji': '❔', 'true_emoji': '❓'}"
 											/>
 											<field name="lunisolar_date_of_marriage" />
-											<field name="marriage_location" />
+											<field name="marriage_location_id" />
 											<field name="divorce_date" />
 										</tree>
 									</field>
@@ -206,7 +206,7 @@
 												options="{'false_emoji': '❔', 'true_emoji': '❓'}"
 											/>
 											<field name="lunisolar_date_of_marriage" />
-											<field name="marriage_location" />
+											<field name="marriage_location_id" />
 											<field name="divorce_date" />
 										</tree>
 									</field>
@@ -227,7 +227,7 @@
 												options="{'false_emoji': '❔', 'true_emoji': '❓'}"
 											/>
 											<field name="lunisolar_date_of_marriage" />
-											<field name="marriage_location" />
+											<field name="marriage_location_id" />
 											<field name="divorce_date" />
 										</tree>
 									</field>
@@ -235,20 +235,15 @@
 									<button name="action_create_relationship_wizard" type="object" string="Add Relationship" colspan="2" />
 								</group>
 							</page>
-							<page name="addresses" string="Past Addresses">
-								<label for="address_ids" />
-								<field name="address_ids"
-									mode="kanban"
-									context="{
-										'default_relative_id': active_id,
-										'default_street': street,
-										'default_street2': street2,
-										'default_city_id': city_name_id,
-										'default_state_id': state_id,
-										'default_zip': zip,
-										'default_country_id': country_id,
-										'default_address_type': 'home'
-										}" />
+							<page name="addresses" string="Addresses">
+								<label for="relative_address_resident_ids"/>
+								<field name="relative_address_resident_ids">
+									<tree editable="top">
+										<field name="sequence" widget="handle" />
+										<field name="address_id" options="{'no_create_edit': 1}" />
+										<field name="address_type" />
+									</tree>
+								</field>
 		                    </page>
 							<page name="notes" string="Internal Notes">
 								<field
@@ -368,7 +363,7 @@
 					/>
 					<group string="Group By">
 						<filter string="Current Address" name="current_address" domain="[]" context="{'group_by': 'current_address_id'}"/>
-						<filter string="Past Addresses" name="addresses" domain="[]" context="{'group_by': 'address_ids'}"/>
+						<filter string="All Addresses" name="addresses" domain="[]" context="{'group_by': 'address_ids'}"/>
 					</group>
 				</search>
 			</field>

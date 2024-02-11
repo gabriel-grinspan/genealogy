@@ -6,8 +6,6 @@
 			<field name="model">relative.address</field>
 			<field name="arch" type="xml">
 				<form string="Address">
-					<field name="address_type" required="1" widget="radio" options="{'horizontal': true}" />
-					<hr />
 					<group>
 						<label for="street" string="Address" />
 						<div class="o_address_format" name="div_address">
@@ -26,8 +24,16 @@
 						<field name="head_of_household_id" />
 
 						<field name="current_relative_ids" mode="kanban" colspan="2"/>
-
 						<field name="past_relative_ids" mode="kanban" colspan="2"/>
+						
+						<field name="relative_address_resident_ids">
+							<tree>
+								<field name="relative_id" />
+								<field name="address_type" />
+							</tree>
+						</field>
+
+						<field name="marriage_ids" mode="tree" />
 
 						<field name="note" placeholder="Internal notes" nolabel="1" colspan="2" />
 					</group>
@@ -106,7 +112,7 @@
 			<field name="arch" type="xml">
 				<search string="Address">
 					<field
-						name="name"
+						name="display_name"
 						filter_domain="['|', '|', '|', '|', '|',
 							('street', 'ilike', self),
 							('street2', 'ilike', self),

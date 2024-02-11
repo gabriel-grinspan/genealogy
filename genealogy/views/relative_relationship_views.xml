@@ -20,7 +20,7 @@
 						options="{'false_emoji': '❔', 'true_emoji': '❓'}"
 					/>
 					<field name="lunisolar_date_of_marriage" />
-					<field name="marriage_location" />
+					<field name="marriage_location_id" />
 					<field name="divorce_date" />
 				</tree>
 			</field>
