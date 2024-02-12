@@ -4,11 +4,9 @@ from odoo import models, fields, api
 class RelativeFamily(models.Model):
     _name = 'relative.family'
     _description = 'Family'
-    _rec_name = 'display_name'
 
     name = fields.Char('Family Name', required=True)
     code = fields.Char('Family Code', size=2, required=True)
-    display_name = fields.Char(compute='_compute_display_name')
     relative_ids = fields.One2many(
         comodel_name='relative',
         inverse_name='family_id',

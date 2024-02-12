@@ -21,6 +21,7 @@ STATE = self.env['res.country.state']
 CITY = self.env['relative.city']
 CITY_NAME = self.env['relative.city.name']
 ADDRESS = self.env['relative.address']
+ADDRESS_LINE = self.env['relative.address.resident']
 
 relative_map = {}
 country_map = {
@@ -109,7 +110,6 @@ def get_city(name, state_id, country_id):
 
     return city_name_id
 
-
 def populate_city_names(sheet):
     def get_cell(row, col):
         return get_cell_with_sheet(sheet, row, col)
@@ -188,7 +188,7 @@ def get_relative(family_code, relative_number):
         relative_map[relative_code] = relative
     return relative
 
-def get_address(street, city, state, zipcode, country, address_type, note=False):
+def get_address(street, city, state, zipcode, country, address_type, relative_id=False, note=False):
     if not country:
         return False
 
@@ -212,7 +212,7 @@ def get_address(street, city, state, zipcode, country, address_type, note=False)
         })
     
     if not country_id:
-        _logger.info([street, city, state, zipcode, country, address_type, note, country_id, country_name, country_code])
+        _logger.info([street, city, state, zipcode, country, address_type, relative_id, note, country_id, country_name, country_code])
         raise 'Big error'
     
     state_id = False
@@ -236,7 +236,6 @@ def get_address(street, city, state, zipcode, country, address_type, note=False)
         ('state_id', '=', state_id and state_id.id),
         ('zip', '=', zipcode),
         ('country_id', '=', country_id.id),
-        ('address_type', '=', address_type),
     ] + ([
         ('note', '=', False),
     ] if not note else [
@@ -250,12 +249,17 @@ def get_address(street, city, state, zipcode, country, address_type, note=False)
             'state_id': state_id and state_id.id,
             'zip': zipcode,
             'country_id': country_id.id,
-            'address_type': address_type,
             'note': note,
         })
 
-    return address_id
+    if relative_id:
+        ADDRESS_LINE.create({
+            'relative_id': relative_id.id,
+            'address_id': address_id.id,
+            'address_type': address_type,
+        })
 
+    return address_id
 
 def get_datetime(date: str):
     if date == '0':
@@ -423,10 +427,8 @@ def import_persons(sheet):
 
         alias_jewish_name = get_create_alias(relative_id, jewish_name, alias_type_jewish)
         alias_nickname = get_create_alias(relative_id, nickname, alias_type_nickname)
-        address_of_birth = get_address(False, city_of_birth, state_of_birth, False, country_of_birth, 'birthplace')
-        address_of_residence = get_address(street_of_residence, city_of_residence, state_of_residence, zipcode_of_residence, country_of_residence, 'home')
-        relative_id.address_ids |= (address_of_birth or ADDRESS) + (address_of_residence or ADDRESS)
-        relative_id.current_address_id = address_of_residence and address_of_residence.id
+        address_of_birth = get_address(False, city_of_birth, state_of_birth, False, country_of_birth, 'birthplace', relative_id=relative_id)
+        address_of_residence = get_address(street_of_residence, city_of_residence, state_of_residence, zipcode_of_residence, country_of_residence, 'home', relative_id=relative_id)
 
         relative_id.title_id = get_create_record(TITLE, title_code)
         relative_id.tribe_id = get_create_record(TRIBE, shcode)
@@ -627,10 +629,11 @@ def process_deaths(sheet):
             'death_after_sunset': died_at_night,
         })
 
-        place_of_death = country_of_death and get_address(False, city_of_death, state_of_death, False, country_of_death, 'death') or ADDRESS
         _logger.info(row)
-        place_of_burial = country_of_burial and get_address(False, city_of_burial, state_of_burial, False, country_of_burial, 'burial_plot', note=note) or ADDRESS
-        relative_id.address_ids |= place_of_death | place_of_burial
+        if country_of_death:
+            get_address(False, city_of_death, state_of_death, False, country_of_death, 'death', relative_id=relative_id)
+        if country_of_burial:
+            get_address(False, city_of_burial, state_of_burial, False, country_of_burial, 'burial', relative_id=relative_id, note=note)
 
     return output
 
@@ -717,6 +720,7 @@ def create_marriages(sheet):
             ('date_of_marriage_approximate', '=', approximate_dom),
             ('marriage_after_sunset', '=', married_at_night),
             ('status_id', '=', status_id.id),
+            ('marriage_location_id', '=', address_of_marriage and address_of_marriage.id),
         ])
 
         if not marriage_id:
@@ -727,6 +731,7 @@ def create_marriages(sheet):
                 'date_of_marriage_approximate': approximate_dom,
                 'marriage_after_sunset': married_at_night,
                 'status_id': status_id.id,
+                'marriage_location_id': address_of_marriage and address_of_marriage.id,
             })
 
 
@@ -769,3 +774,5 @@ notes_sheet = wb.sheet_by_index(10)
 errors += append_notes(notes_sheet)
 
 result = errors
+
+_logger.info('Process finished successfully!')
