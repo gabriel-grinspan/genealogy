@@ -236,12 +236,13 @@
 								</group>
 							</page>
 							<page name="addresses" string="Addresses">
-								<label for="relative_address_resident_ids"/>
-								<field name="relative_address_resident_ids">
+								<label for="relative_address_line_ids"/>
+								<field name="relative_address_line_ids">
 									<tree editable="top">
 										<field name="sequence" widget="handle" />
 										<field name="address_id" options="{'no_create_edit': 1}" />
 										<field name="address_type" />
+										<field name="note" />
 									</tree>
 								</field>
 		                    </page>

@@ -17,7 +17,7 @@ class RelativeAddress(models.Model):
     phone = fields.Char()
     note = fields.Html()
 
-    relative_address_resident_ids = fields.One2many('relative.address.resident', 'address_id', string='Address Residents', readonly=True)
+    relative_address_line_ids = fields.One2many('relative.address.line', 'address_id', string='Address Residents', readonly=True)
     relative_ids = fields.Many2many('relative', string='Residents', compute='_compute_relative_ids')
     past_relative_ids = fields.Many2many('relative', string='Previous Residents', compute='_compute_relative_ids')
     current_relative_ids = fields.One2many('relative', 'current_address_id', string='Current Residents', readonly=True)
@@ -32,10 +32,10 @@ class RelativeAddress(models.Model):
         for address in self:
             address.display_name = address.street or address.city_name_id.name or address.state_id.name or address.country_id.name or 'Unknown'
 
-    @api.depends('current_relative_ids', 'relative_address_resident_ids')
+    @api.depends('current_relative_ids', 'relative_address_line_ids')
     def _compute_relative_ids(self):
         for address in self:
-            relative_ids = address.relative_address_resident_ids.mapped('relative_id')
+            relative_ids = address.relative_address_line_ids.mapped('relative_id')
             address.relative_ids = relative_ids.ids
             address.past_relative_ids = (relative_ids - address.current_relative_ids).ids
 
@@ -76,8 +76,8 @@ class RelativeAddress(models.Model):
             self.city_name_id = False
 
 
-class RelativeAddressResident(models.Model):
-    _name = 'relative.address.resident'
+class RelativeAddressLine(models.Model):
+    _name = 'relative.address.line'
     _description = 'Address Resident'
     _order = 'sequence, id'
 
@@ -89,6 +89,8 @@ class RelativeAddressResident(models.Model):
         ('birthplace', 'Birthplace'),
         ('death', 'Place of Death'),
         ('burial', 'Burial Plot'),
-    ], default='home', string='Address Type')
+        ('other', 'Other'),
+    ], default='home', string='Address Type', required=True)
+    note = fields.Text('Notes')
 
     _sql_constraints = [('relative_address_type_uniq', 'unique(relative_id, address_id, address_type)', 'A relative-address relationship must be unique.')]

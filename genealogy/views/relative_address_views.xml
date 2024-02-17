@@ -26,7 +26,7 @@
 						<field name="current_relative_ids" mode="kanban" colspan="2"/>
 						<field name="past_relative_ids" mode="kanban" colspan="2"/>
 						
-						<field name="relative_address_resident_ids">
+						<field name="relative_address_line_ids">
 							<tree>
 								<field name="relative_id" />
 								<field name="address_type" />

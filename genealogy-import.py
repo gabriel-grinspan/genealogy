@@ -21,7 +21,7 @@ STATE = self.env['res.country.state']
 CITY = self.env['relative.city']
 CITY_NAME = self.env['relative.city.name']
 ADDRESS = self.env['relative.address']
-ADDRESS_LINE = self.env['relative.address.resident']
+ADDRESS_LINE = self.env['relative.address.line']
 
 relative_map = {}
 country_map = {
@@ -230,17 +230,18 @@ def get_address(street, city, state, zipcode, country, address_type, relative_id
     if not city_name_id:
         city_name_id = False
     # _logger.info(f'{city_name_id}, {city_name_id.ids}, {city_name_id.ids == []}')
-    address_id = ADDRESS.search([
+
+    address_domain = [
         ('street', '=', street),
         ('city_name_id', '=', city_name_id and city_name_id.id),
         ('state_id', '=', state_id and state_id.id),
         ('zip', '=', zipcode),
         ('country_id', '=', country_id.id),
-    ] + ([
-        ('note', '=', False),
-    ] if not note else [
-        ('note', 'ilike', note),
-    ]))
+    ]
+
+    # _logger.info(address_domain)
+
+    address_id = ADDRESS.search(address_domain)
 
     if not address_id:
         address_id = ADDRESS.create({
@@ -249,7 +250,6 @@ def get_address(street, city, state, zipcode, country, address_type, relative_id
             'state_id': state_id and state_id.id,
             'zip': zipcode,
             'country_id': country_id.id,
-            'note': note,
         })
 
     if relative_id:
@@ -257,6 +257,7 @@ def get_address(street, city, state, zipcode, country, address_type, relative_id
             'relative_id': relative_id.id,
             'address_id': address_id.id,
             'address_type': address_type,
+            'note': note,
         })
 
     return address_id
