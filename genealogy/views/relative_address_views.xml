@@ -33,8 +33,17 @@
 							</tree>
 						</field>
 
-						<field name="marriage_ids" mode="tree" />
+						<field name="marriage_ids">
+							<tree edit="0">
+								<field name="male_id" />
+								<field name="female_id" />
+								<field name="status_id" />
+								<field name="date_of_marriage" />
+							</tree>
+						</field>
 
+					</group>
+					<group name="notes" string="Internal Notes">
 						<field name="note" placeholder="Internal notes" nolabel="1" colspan="2" />
 					</group>
 				</form>
@@ -141,6 +150,25 @@
 					</group>
 				</search>
 			</field>
+		</record>
+	
+		<record model="ir.ui.view" id="genealogy_relative_address_line_tree">
+			<field name="name">relative.address.line.view.tree</field>
+			<field name="model">relative.address.line</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="relative_id" widget="href"/>
+					<field name="address_id" widget="href"/>
+					<field name="address_type"/>
+					<field name="note"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="action_genealogy_address_line" model="ir.actions.act_window">
+			<field name="name">Residences</field>
+			<field name="res_model">relative.address.line</field>
+			<field name="view_mode">tree,pivot</field>
 		</record>
 	</data>
 </odoo>

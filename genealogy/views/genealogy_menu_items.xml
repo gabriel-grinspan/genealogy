@@ -16,7 +16,20 @@
 			id="menu_address"
 			parent="menu_root"
 			sequence="2"
+		/>
+		<menuitem
+			name="Addresses"
+			id="menu_address_address"
+			parent="menu_address"
+			sequence="5"
 			action="action_genealogy_address"
+		/>
+		<menuitem
+			name="Residences"
+			id="menu_address_address_line"
+			parent="menu_address"
+			sequence="10"
+			action="action_genealogy_address_line"
 		/>
 		<menuitem
 			name="Relationships"
