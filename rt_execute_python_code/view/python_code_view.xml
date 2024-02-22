@@ -24,7 +24,7 @@
                         <field name="code" nolabel="1" colspan="2" widget="ace" options="{'mode':'python'}" style="font-size:100px;"/>
                     </group>
                     <group>
-                        <button name="execute_code" data-hotkey="p" string="Execute" colspan="2" type="object" icon="fa-play"/>
+                        <button name="execute_code" data-hotkey="q" string="Execute" colspan="2" type="object" icon="fa-play"/>
                     </group>
                     <group>
                         <separator string="Result"/>
