@@ -120,8 +120,7 @@
 								<group colspan="2">
 									<field name="tribe_id" />
 									<field name="family_id" />
-									<field name="family_number" />
-									<field name="id" string="Relative Reference" options="{'format': false}" />
+									<field name="id" options="{'format': false}" invisible="not id" />
 								</group>
 
 								<group string="Parents" colspan="2">
@@ -269,7 +268,7 @@
 			<field name="model">relative</field>
 			<field name="arch" type="xml">
 				<tree>
-					<field name="family_code"/>
+					<field name="id"/>
 					<field name="name"/>
 					<field name="date_of_birth"/>
 					<field name="phone"/>
