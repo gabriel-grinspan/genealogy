@@ -1,6 +1,8 @@
 from odoo import models, fields, api
+from odoo.tools import html_escape
 import requests
 from datetime import datetime
+from markupsafe import Markup
 
 
 class Relative(models.Model):
@@ -82,6 +84,95 @@ class Relative(models.Model):
     category_ids = fields.Many2many('res.partner.category', string='Tags')
     note = fields.Html('Note')
 
+
+    def write(self, vals):
+        def _get_selection_str(selection, value):
+            return {k: v for k, v in selection}.get(value)
+
+        def _get_record_names(names):
+            result = ''
+            for name in names:
+                result += f', {name}'
+            if result == '':
+                result = 'False'
+            else:
+                result = result[2:]
+
+            return result
+
+
+        field_names = {}
+        x2many_field_names = {}
+        for key in vals:
+            field = self.fields_get(key)[key]
+            field_data = {
+                'string': field['string'],
+                'type': field['type'],
+                'model': field.get('relation'),
+                'selection': field.get('selection'),
+            }
+            if field['type'] in ['binary']:
+                continue
+            elif field['type'] in ['one2many', 'many2many']:
+                x2many_field_names[key] = field_data
+            else:
+                field_names[key] = field_data
+
+
+        relative_comments = {}
+
+        for relative in self:
+            comment = ''
+            for key in field_names:
+                current_val = getattr(relative, key)
+                current_val_str = current_val
+                new_val = vals[key]
+                new_val_str = new_val
+                if field_names[key]['type'] == 'selection':
+                    current_val_str = _get_selection_str(field_names[key]['selection'], current_val)
+                    new_val_str = _get_selection_str(field_names[key]['selection'], new_val)
+                elif field_names[key]['type'] == 'many2one':
+                    current_val_str = current_val.name
+                    current_val = current_val.id
+                    new_val_str = self.env[field_names[key]['model']].browse(new_val).name
+
+                if current_val != new_val:
+                    comment += f'<li>{field_names[key]["string"]}: {html_escape(current_val_str)} -> {html_escape(new_val_str)}</li>'
+            
+            relative_comments[relative] = comment
+
+        x2many_field_vals = {}
+        for relative in self:
+            x2many_field_vals[relative] = {}
+            for key in x2many_field_names:
+                current_val = getattr(relative, key)
+                x2many_field_vals[relative][key] = current_val
+                
+        res = super(Relative, self).write(vals)
+
+        for relative in x2many_field_vals:
+            comment = ''
+            for key in x2many_field_vals[relative]:
+                current_val = x2many_field_vals[relative][key]
+                current_val_str = _get_record_names(current_val.mapped('display_name'))
+                current_val = current_val.ids
+
+                new_val = getattr(relative, key)
+                if new_val.ids == current_val:
+                    continue
+                
+                new_val_str = _get_record_names(new_val.mapped('display_name'))
+
+                comment += f'<li>{x2many_field_names[key]["string"]}: {html_escape(current_val_str)} -> {html_escape(new_val_str)}</li>'
+            relative_comments[relative] += comment
+        
+        base_comment = '<ul>'
+        base_comment_end = '</ul>'
+        for relative in relative_comments:
+            comment = relative_comments.get(relative)
+            if comment:
+                relative.message_post(body=Markup(base_comment+comment+base_comment_end))
+        return res
 
     @api.depends('first_name', 'last_name')
     def _compute_name(self):
