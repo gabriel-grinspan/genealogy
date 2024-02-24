@@ -1,0 +1,27 @@
+<odoo>
+	<data>
+
+		<record model="ir.ui.view" id="genealogy_relative_form">
+			<field name="name">relative.view.form</field>
+			<field name="model">relative</field>
+			<field name="inherit_id" ref="genealogy.genealogy_relative_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='family_id']" position="after">
+					<field name="family_number" />
+				</xpath>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="genealogy_relative_tree">
+			<field name="name">relative.view.tree</field>
+			<field name="model">relative</field>
+			<field name="inherit_id" ref="genealogy.genealogy_relative_tree"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='id']" position="after">
+					<field name="family_code" optional="hide"/>
+				</xpath>
+			</field>
+		</record>
+
+	</data>
+</odoo>

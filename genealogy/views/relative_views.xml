@@ -268,11 +268,13 @@
 			<field name="model">relative</field>
 			<field name="arch" type="xml">
 				<tree>
-					<field name="id"/>
+					<field name="id" optional="show"/>
 					<field name="name"/>
 					<field name="date_of_birth"/>
-					<field name="phone"/>
-					<field name="email"/>
+					<field name="father_id" optional="show"/>
+					<field name="mother_id" optional="show"/>
+					<field name="phone" optional="hide"/>
+					<field name="email" optional="hide"/>
 				</tree>
 			</field>
 		</record>

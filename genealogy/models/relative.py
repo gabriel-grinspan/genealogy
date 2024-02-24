@@ -52,12 +52,8 @@ class Relative(models.Model):
     address_ids = fields.Many2many('relative.address', string='Addresses', compute='_compute_address_ids', store=True)
     current_address_id = fields.Many2one('relative.address', string='Current Address', compute='_compute_address_ids', store=True)
 
-    # These are for historical purposes
-    family_id = fields.Many2one('relative.family', string='Family')
-    family_number = fields.Integer('Family ID', readonly=True)
-    family_code = fields.Char('Family Code', readonly=True, compute='_compute_family_code', store=True)
-    
     tribe_id = fields.Many2one('relative.tribe', string='Tribe')
+    family_id = fields.Many2one('relative.family', string='Family')
 
     father_id = fields.Many2one('relative', string='Father')
     mother_id = fields.Many2one('relative', string='Mother')
@@ -91,11 +87,6 @@ class Relative(models.Model):
     def _compute_name(self):
         for relative in self:
             relative.name = f'{relative.title_id.shortcut or ""} {relative.first_name or ""} {relative.last_name or ""}'.strip()
-
-    @api.depends('family_id', 'family_number')
-    def _compute_family_code(self):
-        for relative in self:
-            relative.family_code = f'{relative.family_id.code}{relative.family_number}'
 
     # @api.depends('name_orig_ids')
     # def _compute_name_dest_ids(self):
