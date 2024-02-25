@@ -99,6 +99,7 @@
 											<field name="country_id" placeholder="Country" class="o_address_country" options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"/>
 										</div>
 									</div>
+									<field name="head_of_household" />
 								</group>
 							</group>
 						</div>

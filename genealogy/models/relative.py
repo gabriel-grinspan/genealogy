@@ -54,6 +54,7 @@ class Relative(models.Model):
     relative_address_line_ids = fields.One2many('relative.address.line', 'relative_id', string='Addresses')
     address_ids = fields.Many2many('relative.address', string='Addresses', compute='_compute_address_ids', store=True)
     current_address_id = fields.Many2one('relative.address', string='Current Address', compute='_compute_address_ids', store=True)
+    head_of_household = fields.Boolean('Head of Household', compute='_compute_address_ids', store=True)
 
     tribe_id = fields.Many2one('relative.tribe', string='Tribe')
     family_id = fields.Many2one('relative.family', string='Family')
@@ -235,7 +236,7 @@ class Relative(models.Model):
                 lambda relationship: (relationship.male_id | relationship.female_id) - biological_parents
             ) - relative.sibling_ids - relative.half_sibling_ids - relative).ids
 
-    @api.depends('relative_address_line_ids')
+    @api.depends('relative_address_line_ids', 'relative_address_line_ids.address_id', 'relative_address_line_ids.address_id.head_of_household_id')
     def _compute_address_ids(self):
         def _get_sort_order(rar):
             match rar.address_type:
@@ -256,6 +257,7 @@ class Relative(models.Model):
             relative_address_line_id = relative.relative_address_line_ids.sorted(_get_sort_order, reverse=True)[:1]
             if relative_address_line_id:
                 relative.current_address_id = relative_address_line_id.address_id
+                relative.head_of_household = relative_address_line_id.address_id.head_of_household_id.id == relative.id
             else:
                 relative.current_address_id = False
 
