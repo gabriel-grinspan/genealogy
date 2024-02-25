@@ -42,6 +42,7 @@
 			'genealogy/static/src/js/list_renderer_no_link.js',
 			'genealogy/static/src/views/fields/boolean_emoji_field.js',
 			'genealogy/static/src/views/fields/boolean_emoji_field.xml',
+			'genealogy/static/src/views/kanban/kanban_record.js',
 		],
 	},
 	'application': True,
