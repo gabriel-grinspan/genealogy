@@ -188,6 +188,14 @@ class Relative(models.Model):
         for relative in self:
             relative.name = f'{relative.title_id.shortcut or ""} {relative.first_name or ""} {relative.last_name or ""}'.strip()
 
+    @api.depends('first_name', 'last_name', 'date_of_birth')
+    def _compute_display_name(self):
+        for relative in self:
+            if relative.date_of_birth and relative.name:
+                relative.display_name = f'{relative.name} ({relative.date_of_birth.year})'
+            else:
+                relative.display_name = relative.name
+
     # @api.depends('name_orig_ids')
     # def _compute_name_dest_ids(self):
     #     for relative in self:
