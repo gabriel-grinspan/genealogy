@@ -12,6 +12,7 @@ from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 RELATIVE = self.env['relative']
 TITLE = self.env['res.partner.title']
+TAG = self.env['res.partner.category']
 TRIBE = self.env['relative.tribe']
 FAMILY = self.env['relative.family']
 ALIAS_TYPE = self.env['relative.alias.type']
@@ -378,8 +379,8 @@ def import_persons(sheet):
         living_with = get_cell(row, 26)
         title_code = get_cell(row, 27)
         shcode = get_cell(row, 28)
-        # I don't have this data \/
-        # status = get_cell(row, 29)
+        # 'H' is don't contact, store as tag
+        can_contact = get_cell(row, 29)
 
         # Start importing
         family = FAMILY.search([('code', '=', family_code)]) or FAMILY.create({
@@ -419,7 +420,7 @@ def import_persons(sheet):
             'date_of_birth': date_of_birth,
             'date_of_birth_approximate': approximate_dob,
             'birth_after_sunset': born_at_night,
-            'mobile_phone': phone_number,
+            'home_phone': phone_number,
             'sex': get_sex(sex),
             'note': f'Lives with: {living_with}\nMarried: {married}\nLiving: {alive}\nBlood related: {blood_related}\nHoH: {head_of_household}\nNeed to import picture: {has_picture}',
         }
@@ -433,6 +434,9 @@ def import_persons(sheet):
 
         relative_id.title_id = get_create_record(TITLE, title_code)
         relative_id.tribe_id = get_create_record(TRIBE, shcode)
+        
+        if can_contact:
+            relative_id.category_ids = get_create_record(TAG, 'Do not contact')
         
         # Use this to populate the map
         relative_id = get_relative(family_code, relative_number)

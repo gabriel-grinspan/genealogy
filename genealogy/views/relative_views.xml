@@ -32,7 +32,6 @@
 								<group>
 									<field name="title_id"/>
 									<field name="suffix_id"/>
-									<field name="category_ids" widget="many2many_tags"/>
 									<field name="sex"/>
 									<label for="date_of_birth"/>
 									<div>
@@ -85,6 +84,7 @@
 									/>
 								</group>
 								<group>
+									<field name="category_ids" widget="many2many_tags"/>
 									<field name="home_phone" widget="phone"/>
 									<field name="mobile_phone" widget="phone"/>
 									<field name="email" widget="email"/>
