@@ -293,11 +293,11 @@ def compare_hebrew_date(date: datetime, hebrew_date: str) -> bool:
 
     raise ValidationError(f'What day is it man?\n\n{date} {hebrew_date} {response.get("hd")} != {hebrew_day}')
 
-def get_sex(nice):
+def get_sex(sex):
     return {
         'M': 'male',
         'F': 'female',
-    }.get(nice)
+    }.get(sex)
 
 def import_persons(sheet):
     def get_cell(row, col):
