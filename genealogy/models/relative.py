@@ -86,9 +86,6 @@ class Relative(models.Model):
 
 
     def write(self, vals):
-        def _get_selection_str(selection, value):
-            return {k: v for k, v in selection}.get(value)
-
         def _get_record_names(names):
             result = ''
             for name in names:
@@ -129,8 +126,9 @@ class Relative(models.Model):
                 new_val = vals[key]
                 new_val_str = new_val
                 if field_names[key]['type'] == 'selection':
-                    current_val_str = _get_selection_str(field_names[key]['selection'], current_val)
-                    new_val_str = _get_selection_str(field_names[key]['selection'], new_val)
+                    selection_options = {k: v for k, v in field_names[key]['selection']}
+                    current_val_str = selection_options.get(current_val)
+                    new_val_str = selection_options.get(new_val)
                 elif field_names[key]['type'] == 'many2one':
                     current_val_str = current_val.name
                     current_val = current_val.id
