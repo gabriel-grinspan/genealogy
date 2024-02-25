@@ -30,6 +30,7 @@
 		'views/relative_alias_views.xml',
 		'views/relative_city_views.xml',
 		'views/relative_family_views.xml',
+		'views/relative_parent_views.xml',
 		'views/relative_relationship_views.xml',
 		'views/relative_suffix_views.xml',
 		'views/relative_views.xml',

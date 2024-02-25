@@ -60,12 +60,19 @@ class Relative(models.Model):
 
     father_id = fields.Many2one('relative', string='Father')
     mother_id = fields.Many2one('relative', string='Mother')
+    parent_line_ids = fields.One2many('relative.parent', 'child_id', string='Non-biological Parents')
+    step_parent_ids = fields.Many2many('relative', string='Step Parents', compute='_compute_step_parent_ids')
+    adopted_parent_ids = fields.Many2many('relative', compute='_compute_adopted_parent_ids')
 
     sibling_sequence = fields.Integer('nth Sibling', compute='_compute_sibling_sequence')
     sibling_ids = fields.Many2many('relative', string='Siblings', compute='_compute_sibling_ids', readonly=True)
     half_sibling_ids = fields.Many2many('relative', string='Half Siblings', compute='_compute_sibling_ids', readonly=True)
+    adopted_sibling_ids = fields.Many2many('relative', string='Adopted Siblings', compute='_compute_adopted_sibling_ids', readonly=True)
+    step_sibling_ids = fields.Many2many('relative', string='Step Siblings', compute='_compute_step_sibling_ids', readonly=True)
 
-    children_ids = fields.Many2many('relative', string='Children', compute='_compute_children_ids', readonly=True)
+    child_ids = fields.Many2many('relative', string='Children', compute='_compute_child_ids', readonly=True)
+    adopted_child_ids = fields.Many2many('relative', string='Non-biological Children', compute='_compute_child_ids', readonly=True)
+    step_child_ids = fields.Many2many('relative', string='Step Children', compute='_compute_child_ids', readonly=True)
 
     spouse_type = fields.Selection([
         ('male', 'Husband'),
@@ -209,6 +216,25 @@ class Relative(models.Model):
         for relative in self:
             relative.phone = relative.mobile_phone or relative.home_phone
 
+    def get_ancestors(self):
+        ancestors = self.browse()
+        for relative in self:
+            immediate_ancestors = relative.father_id | relative.mother_id
+            ancestors |= immediate_ancestors
+            ancestors |= immediate_ancestors.get_ancestors()
+        return ancestors
+
+    def _compute_adopted_parent_ids(self):
+        for relative in self:
+            relative.adopted_parent_ids = relative.parent_line_ids.mapped('parent_id').ids
+
+    def _compute_step_parent_ids(self):
+        for relative in self:
+            biological_parents = (relative.father_id | relative.mother_id)
+            relative.step_parent_ids = (biological_parents.relationship_ids.mapped(
+                lambda relationship: (relationship.male_id | relationship.female_id) - biological_parents
+            ) - relative.sibling_ids - relative.half_sibling_ids - relative).ids
+
     @api.depends('relative_address_line_ids')
     def _compute_address_ids(self):
         def _get_sort_order(rar):
@@ -291,14 +317,31 @@ class Relative(models.Model):
 
             relative.sibling_ids = full_siblings.ids
             relative.half_sibling_ids = half_siblings.ids
-
-    def _compute_children_ids(self):
+    
+    def _compute_adopted_sibling_ids(self):
         for relative in self:
-            relative.children_ids = self.search([
+            parents = relative.father_id | relative.mother_id | relative.adopted_parent_ids
+            relative.adopted_sibling_ids = (relative.parent_line_ids.search([
+                ('parent_id', 'in', parents.ids),
+            ]).mapped('child_id') + parents.child_ids - parents - relative.sibling_ids - relative.step_child_ids - relative).ids
+    
+    def _compute_step_sibling_ids(self):
+        for relative in self:
+            relative.step_sibling_ids = (relative.step_parent_ids.child_ids - relative.half_sibling_ids).ids
+
+    def _compute_child_ids(self):
+        for relative in self:
+            relative.child_ids = self.search([
                 '|',
                     ('father_id', '=', relative.id),
                     ('mother_id', '=', relative.id),
             ], order='date_of_birth').ids
+
+            relative.adopted_child_ids = (self.env['relative.parent'].search([
+                ('parent_id', '=', relative.id),
+            ]).mapped('child_id') - relative.child_ids - relative).ids
+
+            relative.step_child_ids = ((relative.relationship_ids.mapped(lambda relationship: relationship.male_id | relationship.female_id) - relative).child_ids - relative.child_ids - relative).ids
 
     def _compute_spouse_type(self):
         for relative in self:

@@ -127,14 +127,28 @@
 								<group string="Parents" colspan="2">
 									<field name="father_id" domain="[
 										('id', 'not in', [id, mother_id]),
-										('id', 'not in', children_ids),
+										('id', 'not in', child_ids),
+										('id', 'not in', adopted_parent_ids),
 										('sex', '!=', 'female'),
 									]" />
 									<field name="mother_id" domain="[
 										('id', 'not in', [id, father_id]),
-										('id', 'not in', children_ids),
+										('id', 'not in', child_ids),
+										('id', 'not in', adopted_parent_ids),
 										('sex', '!=', 'male'),
-									]" />
+									]"/>
+
+									<field name="parent_line_ids">
+										<tree editable="top">
+											<field name="sequence" widget="handle" />
+											<field name="parent_id" domain="[('id', '!=', child_id), ('id', 'not in', child_parent_ids)]" />
+											<field name="reason" />
+											<field name="child_id" column_invisible="1" />
+											<field name="child_parent_ids" column_invisible="1" />
+										</tree>
+									</field>
+									<field name="step_parent_ids" widget="many2many_tags" invisible="not step_parent_ids" />
+									<field name="adopted_parent_ids" invisible="1"/>
 								</group>
 
 								<group string="Siblings" colspan="2" invisible="not (sibling_ids or half_sibling_ids)">
@@ -152,13 +166,42 @@
 										invisible="not half_sibling_ids"
 										readonly="1"
 									/>
+
+									<field
+										name="adopted_sibling_ids"
+										mode="kanban"
+										invisible="not adopted_sibling_ids"
+										readonly="1"
+									/>
+
+									<field
+										name="step_sibling_ids"
+										mode="kanban"
+										invisible="not step_sibling_ids"
+										readonly="1"
+									/>
 								</group>
 
 								<group string="Children" colspan="2">
 									<field
-										name="children_ids"
+										name="child_ids"
 										mode="kanban"
 										no_label="1"
+										invisible="not child_ids"
+										readonly="1"
+									/>
+									<field
+										name="adopted_child_ids"
+										mode="kanban"
+										no_label="1"
+										invisible="not adopted_child_ids"
+										readonly="1"
+									/>
+									<field
+										name="step_child_ids"
+										mode="kanban"
+										no_label="1"
+										invisible="not step_child_ids"
 										readonly="1"
 									/>
 								</group>
@@ -166,7 +209,7 @@
 								<group string="Partner History" colspan="4">
 									<field name="spouse_ids" domain="[
 										('id', 'not in', [id, father_id, mother_id]),
-										('id', 'not in', children_ids)
+										('id', 'not in', child_ids)
 									]" widget="many2many_tags" />
 
 									<field name="spouse_type" invisible="1" />
