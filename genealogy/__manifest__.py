@@ -31,6 +31,7 @@
 		'views/relative_city_views.xml',
 		'views/relative_family_views.xml',
 		'views/relative_relationship_views.xml',
+		'views/relative_suffix_views.xml',
 		'views/relative_views.xml',
 		'views/res_country_views.xml',
 		'views/genealogy_menu_items.xml',

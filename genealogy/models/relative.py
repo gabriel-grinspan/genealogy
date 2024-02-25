@@ -15,6 +15,7 @@ class Relative(models.Model):
     first_name = fields.Char('First Name')
     last_name = fields.Char('Last Name')
     name = fields.Char('Name', compute='_compute_name', store=True)
+    suffix_id = fields.Many2one('relative.suffix', string='Suffix')
     alias_ids = fields.One2many('relative.alias', 'relative_id', string='Aliases')
 
     name_orig_ids = fields.Many2many('relative', 'name_dest_id', 'name_orig_id', string='Named After')

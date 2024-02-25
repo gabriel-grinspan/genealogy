@@ -31,6 +31,7 @@
 							<group name="basic_info">
 								<group>
 									<field name="title_id"/>
+									<field name="suffix_id"/>
 									<field name="category_ids" widget="many2many_tags"/>
 									<field name="sex"/>
 									<label for="date_of_birth"/>
@@ -336,6 +337,7 @@
 					<field name="title_id"/>
 					<field name="first_name"/>
 					<field name="last_name"/>
+					<field name="suffix_id"/>
 				</calendar>
 			</field>
 		</record>

@@ -106,6 +106,14 @@
 		/>
 
 		<menuitem
+			name="Suffixes"
+			id="menu_suffix"
+			parent="menu_configuration_relative"
+			sequence="26"
+			action="action_genealogy_suffix"
+		/>
+
+		<menuitem
 			name="Tags"
 			id="menu_tag"
 			parent="menu_configuration_relative"
