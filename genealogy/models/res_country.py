@@ -1,6 +1,6 @@
 from odoo import models, fields, api, _
 from odoo.addons.base.models.res_country import NO_FLAG_COUNTRIES, FLAG_MAPPING
-from odoo.exceptions import UserError
+
 
 class ResCountry(models.Model):
     _inherit = 'res.country'

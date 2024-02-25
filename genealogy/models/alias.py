@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 
+
 class RelativeAlias(models.Model):
     _name = 'relative.alias'
     _description = 'Alias'

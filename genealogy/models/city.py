@@ -1,5 +1,5 @@
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+
 
 class RelativeCity(models.Model):
     _name = 'relative.city'

@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 
+
 class RelativeAddress(models.Model):
     _name = 'relative.address'
     _description = 'Address'
