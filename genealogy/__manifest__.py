@@ -29,7 +29,7 @@
         'views/relative_address_views.xml',
         'views/relative_alias_views.xml',
         'views/relative_city_views.xml',
-        'views/relative_family_code_views.xml',
+        'views/relative_family_views.xml',
         'views/relative_relationship_views.xml',
         'views/relative_views.xml',
         'views/res_country_views.xml',

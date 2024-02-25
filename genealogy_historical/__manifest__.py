@@ -25,6 +25,7 @@
 
     # always loaded
     'data': [
+        'views/relative_relationship_views.xml',
         'views/relative_views.xml',
     ],
 }

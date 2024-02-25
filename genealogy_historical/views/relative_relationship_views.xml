@@ -1,0 +1,28 @@
+
+<odoo>
+    <data>
+		<record id="view_relative_relationship_search" model="ir.ui.view">
+			<field name="name">relative.relationship.search</field>
+			<field name="model">relative.relationship</field>
+			<field name="inherit_id" ref="genealogy.view_relative_relationship_search"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='female_id']" position="after">
+					<field
+						name="male_id"
+						filter_domain="[
+							('male_id.family_code', 'ilike', self),
+						]"
+						string="Husband Family Code"
+					/>
+					<field
+						name="female_id"
+						filter_domain="[
+							('female_id.family_code', 'ilike', self),
+						]"
+						string="Wife Family Code"
+					/>
+				</xpath>
+			</field>
+		</record>
+    </data>
+</odoo>

@@ -355,7 +355,7 @@
 						name="name"
 						filter_domain="['|', '|', '|', '|', '|',
 							('name', 'ilike', self),
-							('family_code', 'ilike', self),
+							('id', 'ilike', self),
 							('email', 'ilike', self),
 							('mobile_phone', 'ilike', self),
 							('home_phone', 'ilike', self),

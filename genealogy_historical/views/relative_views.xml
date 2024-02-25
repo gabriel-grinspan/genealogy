@@ -23,5 +23,21 @@
 			</field>
 		</record>
 
+		<record id="view_relative_search" model="ir.ui.view">
+			<field name="name">relative.search</field>
+			<field name="model">relative</field>
+			<field name="inherit_id" ref="genealogy.view_relative_search"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='name']" position="after">
+					<field
+						name="family_code"
+						filter_domain="[
+							('family_code', 'ilike', self),
+						]"
+						string="Family Code"
+					/>
+				</xpath>
+			</field>
+		</record>
 	</data>
 </odoo>

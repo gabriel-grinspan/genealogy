@@ -47,7 +47,7 @@
 						name="male_id"
 						filter_domain="['|', '|', '|', '|', '|',
 							('male_id.name', 'ilike', self),
-							('male_id.family_code', 'ilike', self),
+							('male_id.id', 'ilike', self),
 							('male_id.email', 'ilike', self),
 							('male_id.mobile_phone', 'ilike', self),
 							('male_id.home_phone', 'ilike', self),
@@ -59,7 +59,7 @@
 						name="female_id"
 						filter_domain="['|', '|', '|', '|', '|',
 							('female_id.name', 'ilike', self),
-							('female_id.family_code', 'ilike', self),
+							('female_id.id', 'ilike', self),
 							('female_id.email', 'ilike', self),
 							('female_id.mobile_phone', 'ilike', self),
 							('female_id.home_phone', 'ilike', self),
