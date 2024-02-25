@@ -82,6 +82,7 @@ class RelativeAddressLine(models.Model):
     _description = 'Address Resident'
     _order = 'sequence, id'
 
+    name = fields.Char(compute='_compute_name')
     sequence = fields.Integer('Sequence')
     relative_id = fields.Many2one('relative', string='Relative', required=True)
     address_id = fields.Many2one('relative.address', string='Address', required=True)
@@ -95,3 +96,7 @@ class RelativeAddressLine(models.Model):
     note = fields.Text('Notes')
 
     _sql_constraints = [('relative_address_type_uniq', 'unique(relative_id, address_id, address_type)', 'A relative-address relationship must be unique.')]
+
+    def _compute_name(self):
+        for address_line in self:
+            address_line.name = address_line.address_id.display_name

@@ -78,6 +78,11 @@
 										widget="boolean_emoji"
 										options="{'false_emoji': '❔', 'true_emoji': '❓'}"
 									/>
+									<field
+										name="death_id"
+										widget="many2many_tags"
+										invisible="not (date_of_death or date_of_death_approximate)"
+									/>
 								</group>
 								<group>
 									<field name="home_phone" widget="phone"/>
@@ -100,6 +105,10 @@
 										</div>
 									</div>
 									<field name="head_of_household" />
+									<field
+										name="occupation_ids"
+										widget="many2many_tags"
+									/>
 								</group>
 							</group>
 						</div>
@@ -131,18 +140,27 @@
 										('id', 'not in', child_ids),
 										('id', 'not in', adopted_parent_ids),
 										('sex', '!=', 'female'),
-									]" />
+									]" options="{
+										'no_create': True,
+										'no_create_edit': True
+									}" />
 									<field name="mother_id" domain="[
 										('id', 'not in', [id, father_id]),
 										('id', 'not in', child_ids),
 										('id', 'not in', adopted_parent_ids),
 										('sex', '!=', 'male'),
-									]"/>
+									]" options="{
+										'no_create': True,
+										'no_create_edit': True
+									}" />
 
 									<field name="parent_line_ids">
-										<tree editable="top">
+										<tree editable="bottom">
 											<field name="sequence" widget="handle" />
-											<field name="parent_id" domain="[('id', '!=', child_id), ('id', 'not in', child_parent_ids)]" />
+											<field name="parent_id" domain="[('id', '!=', child_id), ('id', 'not in', child_parent_ids)]" options="{
+												'no_create': True,
+												'no_create_edit': True
+											}" />
 											<field name="reason" />
 											<field name="child_id" column_invisible="1" />
 											<field name="child_parent_ids" column_invisible="1" />
@@ -282,7 +300,7 @@
 							<page name="addresses" string="Addresses">
 								<label for="relative_address_line_ids"/>
 								<field name="relative_address_line_ids">
-									<tree editable="top">
+									<tree editable="bottom">
 										<field name="sequence" widget="handle" />
 										<field name="address_id" options="{'no_create_edit': 1}" />
 										<field name="address_type" />

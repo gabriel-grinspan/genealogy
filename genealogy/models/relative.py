@@ -37,6 +37,7 @@ class Relative(models.Model):
     death_after_sunset = fields.Boolean()
     lunisolar_date_of_death = fields.Char(compute='_compute_lunisolar_date_of_death', string='Hebrew Date of Death')
     date_of_death_approximate = fields.Boolean('Approximate Date of Death')
+    death_id = fields.Many2many('relative.death', string='Cause of Death')
 
     home_phone = fields.Char('Home Phone')
     mobile_phone = fields.Char('Mobile Phone')
@@ -55,6 +56,7 @@ class Relative(models.Model):
     address_ids = fields.Many2many('relative.address', string='Addresses', compute='_compute_address_ids', store=True)
     current_address_id = fields.Many2one('relative.address', string='Current Address', compute='_compute_address_ids', store=True)
     head_of_household = fields.Boolean('Head of Household', compute='_compute_address_ids', store=True)
+    occupation_ids = fields.Many2many('relative.occupation', string='Occupations')
 
     tribe_id = fields.Many2one('relative.tribe', string='Tribe')
     family_id = fields.Many2one('relative.family', string='Family')

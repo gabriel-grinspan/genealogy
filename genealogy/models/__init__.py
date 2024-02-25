@@ -4,6 +4,6 @@ from . import alias
 from . import city
 from . import family
 from . import relationship
-from . import relative_suffix
+from . import relative_data
 from . import relative
 from . import res_country

@@ -1,0 +1,21 @@
+<odoo>
+	<data>
+		<record id="action_genealogy_death" model="ir.actions.act_window">
+			<field name="name">Causes of Death</field>
+			<field name="res_model">relative.death</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<record id="action_genealogy_occupation" model="ir.actions.act_window">
+			<field name="name">Occupations</field>
+			<field name="res_model">relative.occupation</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		
+		<record id="action_genealogy_suffix" model="ir.actions.act_window">
+			<field name="name">Suffixes</field>
+			<field name="res_model">relative.suffix</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+	</data>
+</odoo>
