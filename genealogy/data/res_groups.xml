@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.module.category" id="module_category_administration_administration">
+            <field name="name">Genealogy</field>
+        </record>
+
+        <record model="res.groups" id="group_genealogy_viewer">
+            <field name="name">Viewer</field>
+            <field name="category_id" ref="genealogy.module_category_administration_administration"/>
+        </record>
+
+        <record model="res.groups" id="group_genealogy_manager">
+            <field name="name">Administrator</field>
+            <field name="category_id" ref="genealogy.module_category_administration_administration"/>
+            <field name="implied_ids" eval="[(4, ref('genealogy.group_genealogy_viewer'))]"/>
+        </record>
+    </data>
+</odoo>
