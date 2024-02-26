@@ -108,7 +108,6 @@ class Relative(models.Model):
 
             return result
 
-
         field_names = {}
         x2many_field_names = {}
         for key in vals:
@@ -125,7 +124,6 @@ class Relative(models.Model):
                 x2many_field_names[key] = field_data
             else:
                 field_names[key] = field_data
-
 
         relative_comments = {}
 
@@ -186,7 +184,7 @@ class Relative(models.Model):
     @api.depends('first_name', 'last_name')
     def _compute_name(self):
         for relative in self:
-            relative.name = f'{relative.title_id.shortcut or ""} {relative.first_name or ""} {relative.last_name or ""}'.strip()
+            relative.name = f'{relative.title_id.shortcut or ""} {relative.first_name or ""} {relative.last_name or ""} {relative.suffix_id.name}'.strip()
 
     @api.depends('first_name', 'last_name', 'date_of_birth')
     def _compute_display_name(self):
