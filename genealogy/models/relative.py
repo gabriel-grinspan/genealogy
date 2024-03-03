@@ -400,10 +400,13 @@ class Relative(models.Model):
             'target': 'new',
         }
 
+    def get_parents(self):
+        return self.father_id | self.mother_id
+
     def get_ancestors(self):
         ancestors = self.browse()
         for relative in self:
-            immediate_ancestors = relative.father_id | relative.mother_id
+            immediate_ancestors = relative.get_parents()
             adopted_ancestors = relative.adopted_parent_ids
             ancestors |= immediate_ancestors | adopted_ancestors
             ancestors |= immediate_ancestors.get_ancestors()
@@ -442,8 +445,21 @@ class Relative(models.Model):
 
         fs = ''
 
-        relatives = self | self.get_ancestors()
-        relatives |= relatives.get_descendants()
+        tree_complexity = self._context.get('tree_complexity', 'up_down')
+
+        relatives = self
+        if tree_complexity == 'everyone':
+            relatives |= self.get_ancestors()
+            relatives |= relatives.get_descendants()
+        elif tree_complexity == 'first_cousins':
+            relatives |= self.get_ancestors()
+            grandparents = self.get_parents().get_parents()
+            relatives |= grandparents.get_descendants()
+        elif tree_complexity == 'up_down':
+            relatives |= self.get_ancestors() | self.get_descendants()
+        else:
+            raise UserError(_('You must select a view complexity.'))
+
         relationships = relatives.get_relationships()
         relatives |= (relationships.mapped('male_id') | relationships.mapped('female_id'))
 

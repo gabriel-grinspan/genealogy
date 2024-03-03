@@ -6,7 +6,9 @@
 			<field name="arch" type="xml">
 				<form>
 					<header>
-	                    <button name="action_pedigree" string="View Tree" type="object" class="oe_highlight" data-hotkey="q"/>
+	                    <button name="action_pedigree" string="View Basic Tree" type="object" class="oe_highlight" data-hotkey="q" context="{'tree_complexity': 'up_down'}"/>
+	                    <button name="action_pedigree" string="View Simplified Tree" type="object" data-hotkey="w" context="{'tree_complexity': 'first_cousins'}"/>
+	                    <button name="action_pedigree" string="View Complex Tree" type="object" data-hotkey="e" context="{'tree_complexity': 'everyone'}"/>
 					</header>
 
 					<sheet>
