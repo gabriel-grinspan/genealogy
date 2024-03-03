@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<record id="view_res_partner_pedigree" model="ir.ui.view">
+			<field name="name">relative.pedigree.wizard</field>
+			<field name="model">relative.pedigree.wizard</field>
+			<field name="arch" type="xml">
+				<form string="Pedigree Chart">
+					<field name="url" widget="iframe" />
+				</form>
+			</field>
+		</record>
+	</data>
+</odoo>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+	<t t-name="genealogy.CharIFrameField">
+		<iframe t-att-src="props.record.data[props.name]" style="height: calc(100vh - 10rem - 3px); width: calc(100vw - 2rem);" />
+	</t>
+
+</templates>

@@ -5,6 +5,10 @@
 			<field name="model">relative</field>
 			<field name="arch" type="xml">
 				<form>
+					<header>
+	                    <button name="action_pedigree" string="View Tree" type="object" class="oe_highlight" data-hotkey="q"/>
+					</header>
+
 					<sheet>
 						<div>
 							<field name="avatar_128" invisible="1"/>

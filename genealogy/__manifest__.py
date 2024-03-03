@@ -37,6 +37,7 @@
 		'views/relative_views.xml',
 		'views/res_country_views.xml',
 		'views/genealogy_menu_items.xml',
+		'wizard/relative_pedigree_wizard_views.xml',
 		'wizard/relative_relationship_wizard_views.xml',
 	],
 
@@ -45,6 +46,8 @@
 			'genealogy/static/src/js/list_renderer_no_link.js',
 			'genealogy/static/src/views/fields/boolean_emoji_field.js',
 			'genealogy/static/src/views/fields/boolean_emoji_field.xml',
+			'genealogy/static/src/views/fields/char_iframe_field.js',
+			'genealogy/static/src/views/fields/char_iframe_field.xml',
 			'genealogy/static/src/views/kanban/kanban_record.js',
 		],
 	},

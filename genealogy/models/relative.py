@@ -405,3 +405,20 @@ class Relative(models.Model):
             'view_mode': 'form',
             'target': 'new',
         }
+
+    def generate_gedcom(self):
+        return ''
+
+    def action_pedigree(self):
+        self.ensure_one()
+
+        return {
+            'name': 'Pedigree Chart',
+            'type': 'ir.actions.act_window',
+            'res_model': 'relative.pedigree.wizard',
+            'view_mode': 'form',
+            'target': 'current',
+            'context': {
+                'url': 'https://ggrinspan.com/',
+            }
+        }

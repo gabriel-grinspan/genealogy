@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { registry } from "@web/core/registry";
+import { registry } from '@web/core/registry';
 import { ListRenderer } from '@web/views/list/list_renderer';
 import { X2ManyField, x2ManyField } from '@web/views/fields/x2many/x2many_field';
 
@@ -25,4 +25,4 @@ export const noLinkMany2ManyField = {
 	component: NoLinkMany2ManyField,
 };
 
-registry.category("fields").add('list_renderer_no_link', noLinkMany2ManyField);
+registry.category('fields').add('list_renderer_no_link', noLinkMany2ManyField);
