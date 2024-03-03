@@ -464,10 +464,10 @@ class Relative(models.Model):
                 relative_str += '\tg' + (r.sex == 'male' and 'm' or r.sex == 'female' and 'f' or 'o')
             
             if r.date_of_birth:
-                relative_str += '\tb' + r.date_of_birth.strftime('%04d%02d%02d')
+                relative_str += '\tb' + r.date_of_birth.strftime('%Y%m%d')
             
             if r.date_of_death:
-                relative_str += '\tz1\td' + r.date_of_death.strftime('%04d%02d%02d')
+                relative_str += '\tz1\td' + r.date_of_death.strftime('%Y%m%d')
             
             if r.father_id:
                 relative_str += f'\tf{r.father_id.id}\tVb'
