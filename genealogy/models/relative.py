@@ -1,8 +1,9 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.tools import html_escape
 import requests
 from datetime import datetime
 from markupsafe import Markup
+from odoo.exceptions import UserError
 
 
 class Relative(models.Model):
@@ -184,7 +185,7 @@ class Relative(models.Model):
     @api.depends('first_name', 'last_name')
     def _compute_name(self):
         for relative in self:
-            relative.name = f'{relative.title_id.shortcut or ""} {relative.first_name or ""} {relative.last_name or ""} {relative.suffix_id.name}'.strip()
+            relative.name = f'{relative.title_id.shortcut or ""} {relative.first_name or ""} {relative.last_name or ""} {relative.suffix_id.name or ""}'.strip()
 
     @api.depends('first_name', 'last_name', 'date_of_birth')
     def _compute_display_name(self):
@@ -224,14 +225,6 @@ class Relative(models.Model):
     def _compute_phone(self):
         for relative in self:
             relative.phone = relative.mobile_phone or relative.home_phone
-
-    def get_ancestors(self):
-        ancestors = self.browse()
-        for relative in self:
-            immediate_ancestors = relative.father_id | relative.mother_id
-            ancestors |= immediate_ancestors
-            ancestors |= immediate_ancestors.get_ancestors()
-        return ancestors
 
     def _compute_adopted_parent_ids(self):
         for relative in self:
@@ -406,19 +399,85 @@ class Relative(models.Model):
             'target': 'new',
         }
 
-    def generate_gedcom(self):
-        return ''
+    def get_ancestors(self):
+        ancestors = self.browse()
+        for relative in self:
+            immediate_ancestors = relative.father_id | relative.mother_id
+            ancestors |= immediate_ancestors
+            ancestors |= immediate_ancestors.get_ancestors()
+        return ancestors
+
+    def get_descendants(self):
+        descendants = self.browse()
+        for relative in self:
+            descendants |= relative.child_ids
+            descendants |= relative.child_ids.get_descendants()
+        return descendants
+
+    def get_relationships(self):
+        return self.env['relative.relationship'].search([
+            '|',
+                ('male_id', 'in', self.ids),
+                ('female_id', '=', self.ids),
+        ])
+
+    def generate_family_script(self):
+        fs = ''
+
+        relatives = self | self.get_ancestors() | self.get_descendants()
+        relationships = self.get_relationships()
+        relatives |= (relationships.mapped('male_id') | relationships.mapped('female_id')) - self
+        for r in relatives:
+            relative_str = f'i{r.id}'
+            if r.first_name:
+                relative_str += f'\tp{r.first_name}'
+            if r.last_name:
+                relative_str += f'\tq{r.last_name}'
+            if r.sex:
+                relative_str += '\tg' + (r.sex == 'male' and 'm' or r.sex == 'female' and 'f' or 'o')
+            if r.date_of_birth:
+                relative_str += '\tb' + r.date_of_birth.strftime('%04d%02d%02d')
+            if r.date_of_death:
+                relative_str += '\tz1\td' + r.date_of_death.strftime('%04d%02d%02d')
+            if r.father_id:
+                relative_str += f'\tf{r.father_id.id}'
+            if r.mother_id:
+                relative_str += f'\tm{r.mother_id.id}'
+            fs += relative_str + '\n'
+        
+        for rs in relationships:
+            relationship_str = f'p{rs.male_id}\t{rs.female_id}\tgr'
+            if rs.date_of_marriage:
+                relationship_str += f'\tb{rs.date_of_marriage}'
+            if rs.marriage_location_id:
+                relationship_str += f'w{rs.marriage_location_id.display_name}'
+            if rs.divorce_date:
+                relationship_str += f'\tz{rs.divorce_date}'
+            fs += relationship_str + '\n'
+
+        return fs
 
     def action_pedigree(self):
         self.ensure_one()
 
-        return {
-            'name': 'Pedigree Chart',
-            'type': 'ir.actions.act_window',
-            'res_model': 'relative.pedigree.wizard',
-            'view_mode': 'form',
-            'target': 'current',
-            'context': {
-                'url': 'https://ggrinspan.com/',
-            }
+        family_script = self.generate_family_script()
+        body = {
+            'operation': 'temp_view',
+            'family': family_script,
+            'parent_gen': 15,
         }
+
+        response = requests.post('https://www.familyecho.com/api/', params={'format': 'json'}, data=body)
+
+        if response.ok and (url := response.json().get('url')):
+            return {
+                'name': 'Pedigree Chart',
+                'type': 'ir.actions.act_window',
+                'res_model': 'relative.pedigree.wizard',
+                'view_mode': 'form',
+                'target': 'current',
+                'context': {
+                    'url': url,
+                }
+            }
+        raise UserError(_('Unable to generate tree.'))
