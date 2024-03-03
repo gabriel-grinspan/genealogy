@@ -11,6 +11,7 @@ class RelativeParent(models.Model):
     child_id = fields.Many2one('relative', string='Child')
     reason = fields.Selection([
         ('adopted', 'Adopted Parent'),
+        ('foster', 'Foster Parent'),
         ('god', 'God Parent'),
         ('other', 'Other'),
     ], string='Reason', required=True)

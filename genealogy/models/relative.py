@@ -403,54 +403,106 @@ class Relative(models.Model):
         ancestors = self.browse()
         for relative in self:
             immediate_ancestors = relative.father_id | relative.mother_id
-            ancestors |= immediate_ancestors
+            adopted_ancestors = relative.adopted_parent_ids
+            ancestors |= immediate_ancestors | adopted_ancestors
             ancestors |= immediate_ancestors.get_ancestors()
         return ancestors
 
     def get_descendants(self):
         descendants = self.browse()
         for relative in self:
-            descendants |= relative.child_ids
-            descendants |= relative.child_ids.get_descendants()
+            children = relative.child_ids | relative.adopted_child_ids
+            descendants |= children
+            descendants |= children.get_descendants()
         return descendants
 
     def get_relationships(self):
         return self.env['relative.relationship'].search([
             '|',
                 ('male_id', 'in', self.ids),
-                ('female_id', '=', self.ids),
+                ('female_id', 'in', self.ids),
         ])
 
     def generate_family_script(self):
+        def _get_parent_char(parent_sex, nth_parnet):
+            if nth_parnet > 2:
+                return False
+            if parent_sex == 'm':
+                return 'mXK'[nth_parnet]
+            if parent_sex == 'f':
+                return 'fYL'[nth_parnet]
+
+        def _get_parent_type_char(parent_reason):
+            return {
+                'adopted': 'a',
+                'foster': 'f',
+                'god': 'g',
+            }.get(parent_reason, False)
+
         fs = ''
 
-        relatives = self | self.get_ancestors() | self.get_descendants()
-        relationships = self.get_relationships()
-        relatives |= (relationships.mapped('male_id') | relationships.mapped('female_id')) - self
+        relatives = self | self.get_ancestors()
+        relatives |= relatives.get_descendants()
+        relationships = relatives.get_relationships()
+        relatives |= (relationships.mapped('male_id') | relationships.mapped('female_id'))
+
         for r in relatives:
             relative_str = f'i{r.id}'
+            parent_count = {
+                'f': 0,
+                'm': 0,
+            }
+
             if r.first_name:
                 relative_str += f'\tp{r.first_name}'
+            
             if r.last_name:
                 relative_str += f'\tq{r.last_name}'
+            
             if r.sex:
                 relative_str += '\tg' + (r.sex == 'male' and 'm' or r.sex == 'female' and 'f' or 'o')
+            
             if r.date_of_birth:
                 relative_str += '\tb' + r.date_of_birth.strftime('%04d%02d%02d')
+            
             if r.date_of_death:
                 relative_str += '\tz1\td' + r.date_of_death.strftime('%04d%02d%02d')
+            
             if r.father_id:
-                relative_str += f'\tf{r.father_id.id}'
+                relative_str += f'\tf{r.father_id.id}\tVb'
+                parent_count['f'] += 1
+            
             if r.mother_id:
-                relative_str += f'\tm{r.mother_id.id}'
+                relative_str += f'\tm{r.mother_id.id}\tVb'
+                parent_count['m'] += 1
+
+            if r.sibling_sequence is not False:
+                relative_str += f'\tO{r.sibling_sequence}'
+            
+            for pl in r.parent_line_ids.sorted(lambda pl: pl.reason):
+                sex = (r.sex == 'male' and 'f' or r.sex == 'female' and 'm' or False)
+                parent_char = _get_parent_char(sex, parent_count[sex])
+                if not parent_char:
+                    continue
+
+                parent_type_str = ''
+                if parent_type_char1 := _get_parent_type_char(pl.reason):
+                    parent_type_char0 = 'VWQ'[parent_count[sex]]
+                    parent_type_str = f'\t{parent_type_char0}{parent_type_char1}'
+                relative_str += f'\t{parent_char}{pl.parent_id.id}{parent_type_str}'
+                parent_count[sex] += 1
+            
+            if current_partner := r.relationship_ids.filtered(lambda rs: not rs.divorce_date and not rs.status_id.ended):
+                relative_str += f'\ts{current_partner[0].id}'
+
             fs += relative_str + '\n'
         
         for rs in relationships:
-            relationship_str = f'p{rs.male_id}\t{rs.female_id}\tgr'
+            relationship_str = f'p{rs.male_id.id}\t{rs.female_id.id}\tgr'
             if rs.date_of_marriage:
                 relationship_str += f'\tb{rs.date_of_marriage}'
             if rs.marriage_location_id:
-                relationship_str += f'w{rs.marriage_location_id.display_name}'
+                relationship_str += f'\tw{rs.marriage_location_id.display_name}'
             if rs.divorce_date:
                 relationship_str += f'\tz{rs.divorce_date}'
             fs += relationship_str + '\n'
