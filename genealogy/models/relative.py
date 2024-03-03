@@ -1,6 +1,7 @@
 from odoo import models, fields, api, _
 from odoo.tools import html_escape
 import requests
+import re
 from datetime import datetime
 from markupsafe import Markup
 from odoo.exceptions import UserError
@@ -492,8 +493,8 @@ class Relative(models.Model):
                 relative_str += f'\t{parent_char}{pl.parent_id.id}{parent_type_str}'
                 parent_count[sex] += 1
             
-            if current_partner := r.relationship_ids.filtered(lambda rs: not rs.divorce_date and not rs.status_id.ended):
-                relative_str += f'\ts{current_partner[0].id}'
+            if current_relationship := r.relationship_ids.filtered(lambda rs: not rs.divorce_date and not rs.status_id.ended and rs.male_id and rs.female_id):
+                relative_str += f'\ts{current_relationship[0].mapped(lambda rs: (rs.male_id | rs.female_id) - r).id}'
 
             fs += relative_str + '\n'
         
@@ -522,6 +523,8 @@ class Relative(models.Model):
         response = requests.post('https://www.familyecho.com/api/', params={'format': 'json'}, data=body)
 
         if response.ok and (url := response.json().get('url')):
+            url = re.sub(r'^http://', 'https://', url)
+
             return {
                 'name': 'Pedigree Chart',
                 'type': 'ir.actions.act_window',
