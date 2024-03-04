@@ -5,6 +5,7 @@ import re
 from datetime import datetime
 from markupsafe import Markup
 from odoo.exceptions import UserError
+from dateutil.relativedelta import relativedelta
 
 
 class Relative(models.Model):
@@ -40,6 +41,8 @@ class Relative(models.Model):
     lunisolar_date_of_death = fields.Char(compute='_compute_lunisolar_date_of_death', string='Hebrew Date of Death')
     date_of_death_approximate = fields.Boolean('Approximate Date of Death')
     death_id = fields.Many2many('relative.death', string='Cause of Death')
+
+    age = fields.Char('Age', compute='_compute_age')
 
     home_phone = fields.Char('Home Phone')
     mobile_phone = fields.Char('Mobile Phone')
@@ -221,6 +224,26 @@ class Relative(models.Model):
     def _compute_lunisolar_date_of_death(self):
         for relative in self:
             relative.lunisolar_date_of_death = not relative.date_of_death_approximate and self._get_lunisolar_date(relative.date_of_death, relative.death_after_sunset)
+
+    @api.depends('date_of_birth', 'date_of_death', 'date_of_birth_approximate', 'date_of_death_approximate')
+    def _compute_age(self):
+        now = fields.Date.today()
+        for relative in self:
+            if not relative.date_of_birth:
+                relative.age = False
+            until = relative.date_of_death or now
+            age = relativedelta(until, relative.date_of_birth)
+            if relative.date_of_birth_approximate or (relative.date_of_death and relative.date_of_death_approximate):
+                relative.age = f'~{age.years} years old'
+            else:
+                age_str_list = []
+                if age.years != 0:
+                    age_str_list.append(f'{age.years} year{age.years != 1 and "s" or ""}')
+                if age.months != 0:
+                    age_str_list.append(f'{age.months} month{age.months != 1 and "s" or ""}')
+                if age.days != 0 or not age_str_list:
+                    age_str_list.append(f'{age.days} day{age.days != 1 and "s" or ""}')
+                relative.age = ', '.join(age_str_list) + ' old'
     
     @api.depends('home_phone', 'mobile_phone')
     def _compute_phone(self):

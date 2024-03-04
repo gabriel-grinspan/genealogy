@@ -84,6 +84,10 @@
 										options="{'false_emoji': '❔', 'true_emoji': '❓'}"
 									/>
 									<field
+										name="age"
+										invisible="not date_of_birth"
+									/>
+									<field
 										name="death_id"
 										widget="many2many_tags"
 										invisible="not (date_of_death or date_of_death_approximate)"
